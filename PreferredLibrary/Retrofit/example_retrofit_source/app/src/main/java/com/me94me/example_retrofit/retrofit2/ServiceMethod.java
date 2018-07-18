@@ -58,25 +58,33 @@ import retrofit2.http.QueryMap;
 import retrofit2.http.QueryName;
 import retrofit2.http.Url;
 
-/** Adapts an invocation of an interface method into an HTTP call. */
 final class ServiceMethod<R, T> {
-  // Upper and lower characters, digits, underscores, and hyphens, starting with a character.
   static final String PARAM = "[a-zA-Z][a-zA-Z0-9_-]*";
   static final Pattern PARAM_URL_REGEX = Pattern.compile("\\{(" + PARAM + ")\\}");
   static final Pattern PARAM_NAME_REGEX = Pattern.compile(PARAM);
-
+  //默认为OkHttpClient
   private final okhttp3.Call.Factory callFactory;
+  //请求适配器
   private final CallAdapter<R, T> callAdapter;
-
+  //baseUrl
   private final HttpUrl baseUrl;
+  //数据转化器
   private final Converter<ResponseBody, R> responseConverter;
+  //请求方法
   private final String httpMethod;
+  //相对方法
   private final String relativeUrl;
+  //请求头部
   private final Headers headers;
+  //请求body的类型
   private final MediaType contentType;
+  //是否有body
   private final boolean hasBody;
+  //是否解码
   private final boolean isFormEncoded;
+  //是否是multipart类型
   private final boolean isMultipart;
+  //接口方法参数处理器
   private final ParameterHandler<?>[] parameterHandlers;
 
   ServiceMethod(Builder<R, T> builder) {
@@ -96,6 +104,9 @@ final class ServiceMethod<R, T> {
 
   /** Builds an HTTP request from method arguments. */
   okhttp3.Call toCall(@Nullable Object... args) throws IOException {
+    /**
+     * 通过参数构建请求对象
+     */
     RequestBuilder requestBuilder = new RequestBuilder(httpMethod, baseUrl, relativeUrl, headers,
         contentType, hasBody, isFormEncoded, isMultipart);
 
@@ -158,54 +169,56 @@ final class ServiceMethod<R, T> {
     Builder(Retrofit retrofit, Method method) {
       this.retrofit = retrofit;
       this.method = method;
+      //接口方法的所有注解
       this.methodAnnotations = method.getAnnotations();
+      //接口方法参数类型
       this.parameterTypes = method.getGenericParameterTypes();
+      //接口方法的注解内容
       this.parameterAnnotationsArray = method.getParameterAnnotations();
     }
 
+    /**
+     * 构建ServiceMethod对象
+     */
     public ServiceMethod build() {
+      //请求适配器
       callAdapter = createCallAdapter();
+      //请求适配器转换后的类型
       responseType = callAdapter.responseType();
       if (responseType == Response.class || responseType == okhttp3.Response.class) {
-        throw methodError("'"
-            + Utils.getRawType(responseType).getName()
-            + "' is not a valid response body type. Did you mean ResponseBody?");
+        throw methodError("'" + Utils.getRawType(responseType).getName() + "' is not a valid response body type. Did you mean ResponseBody?");
       }
+      //获取数据转换器
       responseConverter = createResponseConverter();
-
+      //解析接口方法上的所有注解
       for (Annotation annotation : methodAnnotations) {
         parseMethodAnnotation(annotation);
       }
-
+      //判空
       if (httpMethod == null) {
         throw methodError("HTTP method annotation is required (e.g., @GET, @POST, etc.).");
       }
-
       if (!hasBody) {
         if (isMultipart) {
-          throw methodError(
-              "Multipart can only be specified on HTTP methods with request body (e.g., @POST).");
+          throw methodError("Multipart can only be specified on HTTP methods with request body (e.g., @POST).");
         }
         if (isFormEncoded) {
-          throw methodError("FormUrlEncoded can only be specified on HTTP methods with "
-              + "request body (e.g., @POST).");
+          throw methodError("FormUrlEncoded can only be specified on HTTP methods with " + "request body (e.g., @POST).");
         }
       }
-
+      //接口方法的参数类型
       int parameterCount = parameterAnnotationsArray.length;
       parameterHandlers = new ParameterHandler<?>[parameterCount];
       for (int p = 0; p < parameterCount; p++) {
         Type parameterType = parameterTypes[p];
-        if (Utils.hasUnresolvableType(parameterType)) {
-          throw parameterError(p, "Parameter type must not include a type variable or wildcard: %s",
+
+        if (Utils.hasUnresolvableType(parameterType)) { throw parameterError(p, "Parameter type must not include a type variable or wildcard: %s",
               parameterType);
         }
-
+        //每个参数的注解
         Annotation[] parameterAnnotations = parameterAnnotationsArray[p];
-        if (parameterAnnotations == null) {
-          throw parameterError(p, "No Retrofit annotation found.");
-        }
-
+        if (parameterAnnotations == null) { throw parameterError(p, "No Retrofit annotation found."); }
+        //每个参数创建一个parameterHandler并解析
         parameterHandlers[p] = parseParameter(p, parameterType, parameterAnnotations);
       }
 
@@ -225,17 +238,22 @@ final class ServiceMethod<R, T> {
       return new ServiceMethod<>(this);
     }
 
+    /**
+     * 创建请求适配器
+     */
     private CallAdapter<T, R> createCallAdapter() {
+      //获取返回类型
       Type returnType = method.getGenericReturnType();
       if (Utils.hasUnresolvableType(returnType)) {
-        throw methodError(
-            "Method return type must not include a type variable or wildcard: %s", returnType);
+        throw methodError("Method return type must not include a type variable or wildcard: %s", returnType);
       }
       if (returnType == void.class) {
         throw methodError("Service methods cannot return void.");
       }
+      //获取接口方法的注解
       Annotation[] annotations = method.getAnnotations();
       try {
+        //返回retrofit的CallAdapter
         //noinspection unchecked
         return (CallAdapter<T, R>) retrofit.callAdapter(returnType, annotations);
       } catch (RuntimeException e) { // Wide exception range because factories are user code.
@@ -243,6 +261,9 @@ final class ServiceMethod<R, T> {
       }
     }
 
+    /**
+     * 解析接口方法上的注解
+     */
     private void parseMethodAnnotation(Annotation annotation) {
       if (annotation instanceof DELETE) {
         parseHttpMethodAndPath("DELETE", ((DELETE) annotation).value(), false);
@@ -334,28 +355,28 @@ final class ServiceMethod<R, T> {
       return builder.build();
     }
 
+
+    /**
+     * 解析接口方法上的参数
+     */
     private ParameterHandler<?> parseParameter(
         int p, Type parameterType, Annotation[] annotations) {
       ParameterHandler<?> result = null;
+      //循环注解
       for (Annotation annotation : annotations) {
-        ParameterHandler<?> annotationAction = parseParameterAnnotation(
-            p, parameterType, annotations, annotation);
-
+        //解析该参数注解
+        ParameterHandler<?> annotationAction = parseParameterAnnotation(p, parameterType, annotations, annotation);
         if (annotationAction == null) {
           continue;
         }
-
         if (result != null) {
           throw parameterError(p, "Multiple Retrofit annotations found, only one allowed.");
         }
-
         result = annotationAction;
       }
-
       if (result == null) {
         throw parameterError(p, "No Retrofit annotation found.");
       }
-
       return result;
     }
 
@@ -735,6 +756,9 @@ final class ServiceMethod<R, T> {
       }
     }
 
+    /**
+     * 获取Retrofit的数据转换器
+     */
     private Converter<ResponseBody, T> createResponseConverter() {
       Annotation[] annotations = method.getAnnotations();
       try {

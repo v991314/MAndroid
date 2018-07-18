@@ -22,7 +22,8 @@ import java.lang.reflect.Type;
 import androidx.annotation.Nullable;
 
 /**
- * 适配请求返回的Response类型
+ * CallAdapter用于对原始Call进行再次封装，
+ * 适配请求返回的Response类型,如Call<R>到Observable<R>
  * 从{@linkplain Retrofit.Builder#addCallAdapterFactory(Factory) installed}的Factory中创建的CallAdapter
  */
 public interface CallAdapter<R, T> {

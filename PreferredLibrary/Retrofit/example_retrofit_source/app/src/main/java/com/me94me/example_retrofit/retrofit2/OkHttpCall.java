@@ -35,12 +35,14 @@ import static com.me94me.example_retrofit.retrofit2.Utils.throwIfFatal;
  */
 final class OkHttpCall<T> implements Call<T> {
 
+  //包含所有请求参数的对象
   private final ServiceMethod<T, ?> serviceMethod;
-
+  //网络请求接口的参数
   private final @Nullable Object[] args;
 
   private volatile boolean canceled;
 
+  //实际进行访问的类
   @GuardedBy("this")
   private @Nullable okhttp3.Call rawCall;
 
@@ -91,7 +93,7 @@ final class OkHttpCall<T> implements Call<T> {
 
     okhttp3.Call call;
     Throwable failure;
-
+    //同步锁
     synchronized (this) {
       if (executed) throw new IllegalStateException("Already executed.");
       executed = true;
@@ -100,6 +102,7 @@ final class OkHttpCall<T> implements Call<T> {
       failure = creationFailure;
       if (call == null && failure == null) {
         try {
+          //创建真正的请求的对象
           call = rawCall = createRawCall();
         } catch (Throwable t) {
           throwIfFatal(t);
@@ -128,6 +131,7 @@ final class OkHttpCall<T> implements Call<T> {
         }
 
         try {
+          //回调
           callback.onResponse(OkHttpCall.this, response);
         } catch (Throwable t) {
           t.printStackTrace();
@@ -152,6 +156,10 @@ final class OkHttpCall<T> implements Call<T> {
     return executed;
   }
 
+
+  /**
+   * 这里同步请求
+   */
   @Override public Response<T> execute() throws IOException {
     okhttp3.Call call;
 
@@ -184,10 +192,12 @@ final class OkHttpCall<T> implements Call<T> {
     if (canceled) {
       call.cancel();
     }
-
     return parseResponse(call.execute());
   }
 
+  /**
+   * 创建请求对象
+   */
   private okhttp3.Call createRawCall() throws IOException {
     okhttp3.Call call = serviceMethod.toCall(args);
     if (call == null) {
@@ -196,15 +206,19 @@ final class OkHttpCall<T> implements Call<T> {
     return call;
   }
 
+  /**
+   * 解析放回值
+   * @throws IOException io
+   */
   Response<T> parseResponse(okhttp3.Response rawResponse) throws IOException {
     ResponseBody rawBody = rawResponse.body();
-
     // Remove the body's source (the only stateful object) so we can pass the response along.
     rawResponse = rawResponse.newBuilder()
         .body(new NoContentResponseBody(rawBody.contentType(), rawBody.contentLength()))
         .build();
 
     int code = rawResponse.code();
+    //检查请求返回的code
     if (code < 200 || code >= 300) {
       try {
         // Buffer the entire body to avoid future I/O.
@@ -222,6 +236,7 @@ final class OkHttpCall<T> implements Call<T> {
 
     ExceptionCatchingRequestBody catchingBody = new ExceptionCatchingRequestBody(rawBody);
     try {
+      //通过数据转换器解析成我们需要的类型
       T body = serviceMethod.toResponse(catchingBody);
       return Response.success(body, rawResponse);
     } catch (RuntimeException e) {

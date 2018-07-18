@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         val service = retrofit.create(Service::class.java)
 
         val call = service.getJoke()
+
         call.enqueue(object: Callback<List<JokeBean>?> {
             override fun onFailure(call: Call<List<JokeBean>?>?, t: Throwable?) {
                 Log.e(tag,"onFailure")

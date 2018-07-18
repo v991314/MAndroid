@@ -60,22 +60,31 @@ public final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
 
   /**
    * 异步回调请求
+   * 采用了装饰模式,真正执行请求的还是OkHttpCall,希望请求时做一些额外操作，如请求结束做线程的切换
    */
   static final class ExecutorCallbackCall<T> implements Call<T> {
     final Executor callbackExecutor;
     final Call<T> delegate;
 
+    /**
+     * @param callbackExecutor 默认为MainThreadExecutor
+     * @param delegate 为通过serviceMethod配置好的OkHttpCall
+     */
     ExecutorCallbackCall(Executor callbackExecutor, Call<T> delegate) {
       this.callbackExecutor = callbackExecutor;
       this.delegate = delegate;
     }
 
+    /**
+     * 调用的OkHttpCall的方法，最后通过OkHttp.call进行请求
+     */
     @Override public void enqueue(final Callback<T> callback) {
       checkNotNull(callback, "callback == null");
 
       delegate.enqueue(new Callback<T>() {
         @Override public void onResponse(Call<T> call, final Response<T> response) {
-
+          //这里实际上调用了handler的Post切换到了主线程进行处理
+          //callbackExecutor为MainThreadExecutor
           callbackExecutor.execute(new Runnable() {
             @Override public void run() {
               if (delegate.isCanceled()) {
@@ -109,9 +118,11 @@ public final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
       return delegate.execute();
     }
 
+
     @Override public void cancel() {
       delegate.cancel();
     }
+
 
     @Override public boolean isCanceled() {
       return delegate.isCanceled();
@@ -125,5 +136,6 @@ public final class ExecutorCallAdapterFactory extends CallAdapter.Factory {
     @Override public Request request() {
       return delegate.request();
     }
+
   }
 }

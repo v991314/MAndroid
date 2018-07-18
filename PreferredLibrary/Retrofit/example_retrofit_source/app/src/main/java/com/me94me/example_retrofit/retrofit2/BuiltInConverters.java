@@ -47,6 +47,9 @@ final class BuiltInConverters extends Converter.Factory {
     return null;
   }
 
+  /**
+   * 无返回值
+   */
   static final class VoidResponseBodyConverter implements Converter<ResponseBody, Void> {
     static final VoidResponseBodyConverter INSTANCE = new VoidResponseBodyConverter();
 

@@ -33,6 +33,7 @@ import androidx.annotation.RequiresApi;
 
 
 class Platform {
+
   private static final Platform PLATFORM = findPlatform();
 
   static Platform get() {
@@ -81,8 +82,13 @@ class Platform {
     throw new UnsupportedOperationException();
   }
 
+
+  /**
+   * Java8
+   */
   //@IgnoreJRERequirement // Only classloaded and used on Java 8.
   static class Java8 extends Platform {
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override boolean isDefaultMethod(Method method) {
       return method.isDefault();
@@ -102,20 +108,39 @@ class Platform {
     }
   }
 
+
+
+
+  /**
+   * Android平台
+   */
+
   static class Android extends Platform {
-    @Override public Executor defaultCallbackExecutor() {
+    /**
+     * 默认回调器
+     */
+    @Override
+    public Executor defaultCallbackExecutor() {
       return new MainThreadExecutor();
     }
-
+    /**
+     * 默认CallAdapter
+     */
     @Override CallAdapter.Factory defaultCallAdapterFactory(@Nullable Executor callbackExecutor) {
       if (callbackExecutor == null) throw new AssertionError();
       return new ExecutorCallAdapterFactory(callbackExecutor);
     }
 
     static class MainThreadExecutor implements Executor {
+      /**
+       * 主线程handler
+       */
       private final Handler handler = new Handler(Looper.getMainLooper());
-
+      /**
+       *  发送消息
+       */
       @Override public void execute(Runnable r) {
+        //在UI线程对请求返回的数据进行处理
         handler.post(r);
       }
     }

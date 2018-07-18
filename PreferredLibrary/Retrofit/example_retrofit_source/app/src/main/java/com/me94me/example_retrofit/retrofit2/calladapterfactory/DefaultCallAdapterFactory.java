@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 /**
+ * 使用策略模式根据返回值类型寻找合适的CallAdapter然后创建CallAdapter实例
  * 创建callAdapter,使用相同的线程来进行IO操作和应用级别的回调
  */
 public class DefaultCallAdapterFactory extends CallAdapter.Factory {
