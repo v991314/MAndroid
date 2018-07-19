@@ -190,6 +190,8 @@ For example, if this type is {@code O<T>.I<S>},return a representation of {@code
 
 依据解释,我们知道
 
+```Java
 O<T>.I<S>类型的变量,调用getOwnerType()会返回O<T>
+```
 
 以上就是ParameterizedType的内容
