@@ -99,6 +99,12 @@ class LiveDataCallAdapterFactory : CallAdapter.Factory() {
 
 其实有几个小知识点
 
-第一个,[什么是ParameterizedType](https://github.com/me94me/mandroid/blob/master/Java/Type/ParameterizedType.md)
+第一个 [什么是ParameterizedType](https://github.com/me94me/mandroid/blob/master/Java/Type/ParameterizedType.md)
 
-第二个,AtomicBoolean的作用
+第二个 [AtomicBoolean的作用](https://github.com/me94me/mandroid/blob/master/Java/Atomic/AtomicBoolean/AutomicBoolean.md)
+
+也可以参照一下官方的例子[android-architecture-components](https://github.com/googlesamples/android-architecture-components)
+
+[LiveDataCallAdapterFactory链接走你](https://github.com/googlesamples/android-architecture-components/blob/master/GithubBrowserSample/app/src/main/java/com/android/example/github/util/LiveDataCallAdapterFactory.kt)
+
+写代码要知道原理,总不能老是复制粘贴拿来主义吧
