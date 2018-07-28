@@ -558,7 +558,7 @@ public class NavController {
             throw new IllegalStateException("no current navigation node");
         }
         int destId = resId;
-        //获取顶层的NavAction
+        //获取resId对应的NavAction
         final NavAction navAction = currentNode.getAction(resId);
         if (navAction != null) {
             if (navOptions == null) {

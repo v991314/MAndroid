@@ -91,9 +91,10 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
 
     @Override
     public void navigate(Destination destination,Bundle args,NavOptions navOptions) {
+        //通过反射构建Fragment实例
         final Fragment frag = destination.createFragment(args);
         final FragmentTransaction ft = mFragmentManager.beginTransaction();
-
+        //处理动画
         int enterAnim = navOptions != null ? navOptions.getEnterAnim() : -1;
         int exitAnim = navOptions != null ? navOptions.getExitAnim() : -1;
         int popEnterAnim = navOptions != null ? navOptions.getPopEnterAnim() : -1;
@@ -105,19 +106,16 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
             popExitAnim = popExitAnim != -1 ? popExitAnim : 0;
             ft.setCustomAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim);
         }
-
+        //放入容器中
         ft.replace(mContainerId, frag);
-
         final StateFragment oldState = getState();
         if (oldState != null) {
             ft.remove(oldState);
         }
-
         final @IdRes int destId = destination.getId();
         final StateFragment newState = new StateFragment();
         newState.mCurrentDestId = destId;
         ft.add(newState, StateFragment.FRAGMENT_TAG);
-
         final boolean initialNavigation = mFragmentManager.getFragments().isEmpty();
         final boolean isClearTask = navOptions != null && navOptions.shouldClearTask();
         // TODO Build first class singleTop behavior for fragments
