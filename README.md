@@ -10,18 +10,13 @@
 
 [Retrofit与LiveData结合使用](https://github.com/me94me/mandroid/blob/master/PreferredLibrary/Retrofit/Article/Retrofit%E4%B8%8ELiveData%E7%BB%93%E5%90%88.md)
 
+### Navigation
+
+
+
 ## Java学习
 
 [AtomicBoolean](https://github.com/me94me/mandroid/blob/master/Java/Atomic/AtomicBoolean/AutomicBoolean.md)
 
 [ParmeterizedType](https://github.com/me94me/mandroid/blob/master/Java/Type/ParameterizedType.md)
 
-注:
-
-不太喜欢将源码学习写成文章
-
-把源码的解析都放在代码里面了
-
-然后画画类图时序图
-
-代码的解释能力最强
