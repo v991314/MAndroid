@@ -4,13 +4,13 @@
 
 ### Retrofit
 
-[Retrofit源码解析](https://github.com/me94me/Mandroid/tree/master/PreferredLibrary/Retrofit/example_retrofit_source)
+[Retrofit源码学习](https://github.com/me94me/Mandroid/tree/master/PreferredLibrary/Retrofit/example_retrofit_source)
 
 > [Retrofit与LiveData结合使用](https://github.com/me94me/mandroid/blob/master/PreferredLibrary/Retrofit/Article/Retrofit%E4%B8%8ELiveData%E7%BB%93%E5%90%88.md)
 
 ### Navigation
 
-[Navigation源码解析](https://github.com/me94me/Mandroid/tree/master/PreferredLibrary/Navigation/example_navigatioin_resource)
+[Navigation源码学习](https://github.com/me94me/Mandroid/tree/master/PreferredLibrary/Navigation/example_navigatioin_resource)
 
 ## Java学习
 
