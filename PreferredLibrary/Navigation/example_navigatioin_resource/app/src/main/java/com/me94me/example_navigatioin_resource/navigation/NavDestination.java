@@ -288,6 +288,7 @@ public class NavDestination {
     public void navigate(@Nullable Bundle args, @Nullable NavOptions navOptions) {
         Bundle defaultArgs = getDefaultArguments();
         Bundle finalArgs = new Bundle();
+        //合并参数
         finalArgs.putAll(defaultArgs);
         if (args != null) {
             finalArgs.putAll(args);

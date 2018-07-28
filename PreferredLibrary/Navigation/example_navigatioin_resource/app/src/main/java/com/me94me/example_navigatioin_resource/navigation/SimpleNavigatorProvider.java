@@ -1,27 +1,11 @@
-/*
- * Copyright (C) 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package com.me94me.example_navigatioin_resource.navigation;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
 
 import java.util.HashMap;
+
+import androidx.annotation.RestrictTo;
 
 /**
  * Simple implementation of a {@link NavigatorProvider} that stores instances of
@@ -32,13 +16,12 @@ import java.util.HashMap;
 @SuppressLint("TypeParameterUnusedInFormals")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class SimpleNavigatorProvider implements NavigatorProvider {
+
     private static final HashMap<Class, String> sAnnotationNames = new HashMap<>();
 
-    private final HashMap<String, Navigator<? extends NavDestination>> mNavigators =
-            new HashMap<>();
+    private final HashMap<String, Navigator<? extends NavDestination>> mNavigators = new HashMap<>();
 
-    @NonNull
-    private String getNameForNavigator(@NonNull Class<? extends Navigator> navigatorClass) {
+    private String getNameForNavigator(Class<? extends Navigator> navigatorClass) {
         String name = sAnnotationNames.get(navigatorClass);
         if (name == null) {
             Navigator.Name annotation = navigatorClass.getAnnotation(Navigator.Name.class);
@@ -52,19 +35,16 @@ public class SimpleNavigatorProvider implements NavigatorProvider {
         return name;
     }
 
-    @NonNull
+
     @Override
-    public <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(
-            @NonNull Class<T> navigatorClass) {
+    public <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(Class<T> navigatorClass) {
         String name = getNameForNavigator(navigatorClass);
         return getNavigator(name);
     }
 
     @SuppressWarnings("unchecked")
-    @NonNull
     @Override
-    public <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(
-            @NonNull String name) {
+    public <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(String name) {
         if (!validateName(name)) {
             throw new IllegalArgumentException("navigator name cannot be an empty string");
         }
@@ -77,19 +57,20 @@ public class SimpleNavigatorProvider implements NavigatorProvider {
         return (T) navigator;
     }
 
-    @Nullable
-    @Override
-    public Navigator<? extends NavDestination> addNavigator(
-            @NonNull Navigator<? extends NavDestination> navigator) {
-        String name = getNameForNavigator(navigator.getClass());
 
+    /**
+     * 添加Navigator,默认为FragmentNavigator
+     * 并以name和navigator存入hashMap中
+     */
+    @Override
+    public Navigator<? extends NavDestination> addNavigator( Navigator<? extends NavDestination> navigator) {
+        String name = getNameForNavigator(navigator.getClass());
         return addNavigator(name, navigator);
     }
 
-    @Nullable
+
     @Override
-    public Navigator<? extends NavDestination> addNavigator(@NonNull String name,
-            @NonNull Navigator<? extends NavDestination> navigator) {
+    public Navigator<? extends NavDestination> addNavigator(String name, Navigator<? extends NavDestination> navigator) {
         if (!validateName(name)) {
             throw new IllegalArgumentException("navigator name cannot be an empty string");
         }

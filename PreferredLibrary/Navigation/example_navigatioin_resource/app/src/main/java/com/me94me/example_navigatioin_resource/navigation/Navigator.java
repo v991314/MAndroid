@@ -164,9 +164,7 @@ public abstract class Navigator<D extends NavDestination> {
     }
 
     /**
-     * Dispatch a navigated event to all registered {@link OnNavigatorNavigatedListener listeners}.
-     * Utility for navigator implementations.
-     *
+     * 将导航事件发送到所有已注册的{@link OnNavigatorNavigatedListener listeners}。导航器实现的功能。
      * @param destId id of the new destination
      * @param backStackEffect how the navigation event affects the back stack
      */

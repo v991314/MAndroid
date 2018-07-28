@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewParent;
 
+import com.me94me.example_navigatioin_resource.R;
+
 import java.lang.ref.WeakReference;
 
 import androidx.core.app.ActivityCompat;
@@ -73,6 +75,8 @@ public class Navigation {
      * 将NavController与给定的View相关联
      * 允许开发人员使用{@link #findNavController（View）}和{@link #findNavController（Activity，int）}
      * 与该View或其任何子项一起检索NavController。
+     *
+     * 在{@link NavHostFragment#onViewCreated}中调用
      *
      * @param view 与NavController相关联的View
      * @param controller 通过{@link #findNavController(View)}获取的NavController

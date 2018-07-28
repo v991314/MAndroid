@@ -27,8 +27,14 @@ import androidx.annotation.NonNull;
  * 例如,导航结构也可以通过远程服务器决定获取
  */
 public class NavController {
+
+    //两个Controller的状态,当NavHostFragment执行onSaveInstanceState时保存
+    //GraphId
     private static final String KEY_GRAPH_ID = "android-support-nav:controller:graphId";
+    //回退栈目的地Id
     private static final String KEY_BACK_STACK_IDS = "android-support-nav:controller:backStackIds";
+
+
     static final String KEY_DEEP_LINK_IDS = "android-support-nav:controller:deepLinkIds";
     static final String KEY_DEEP_LINK_EXTRAS = "android-support-nav:controller:deepLinkExtras";
     /**
@@ -46,12 +52,14 @@ public class NavController {
     //回退栈,使用了双端队列
     private final Deque<NavDestination> mBackStack = new ArrayDeque<>();
 
+    /**
+     * 提供Navigator,在NavHostFragment的onCreate()中创建赋值
+     */
     private final SimpleNavigatorProvider mNavigatorProvider = new SimpleNavigatorProvider() {
         @Override
         public Navigator<? extends NavDestination> addNavigator(String name,
                 Navigator<? extends NavDestination> navigator) {
-            Navigator<? extends NavDestination> previousNavigator =
-                    super.addNavigator(name, navigator);
+            Navigator<? extends NavDestination> previousNavigator = super.addNavigator(name, navigator);
             if (previousNavigator != navigator) {
                 if (previousNavigator != null) {
                     previousNavigator.removeOnNavigatorNavigatedListener(mOnNavigatedListener);
@@ -212,12 +220,12 @@ public class NavController {
 
 
     /**
-     * Attempts to pop the controller's back stack back to a specific destination.
+     * 尝试将控制器的后退堆栈弹回特定目标。
      *
-     * @param destinationId The topmost destination to retain
-     * @param inclusive Whether the given destination should also be popped.
+     * @param destinationId 保留的最高目的地
+     * @param inclusive 是否也应弹出给定目的地。
      *
-     * @return true if the stack was popped at least once, false otherwise
+     * @return 如果堆栈至少弹出一次，则为true，否则为false
      */
     public boolean popBackStack(@IdRes int destinationId, boolean inclusive) {
         if (mBackStack.isEmpty()) {
@@ -336,18 +344,14 @@ public class NavController {
     }
 
     /**
-     * Sets the {@link NavGraph navigation graph} to the specified resource.
-     * Any current navigation graph data will be replaced.
-     *
-     * <p>The inflated graph can be retrieved via {@link #getGraph()}.</p>
-     *
-     * @param graphResId resource id of the navigation graph to inflate
+     * 将{@link NavGraph 导航图}设置为指定的资源。
+     * 将替换任何当前导航图数据。
      *
      * @see #getNavInflater()
      * @see #setGraph(NavGraph)
      * @see #getGraph
      */
-    public void setGraph(@NavigationRes int graphResId) {
+    public void setGraph(int graphResId) {
         mGraph = getNavInflater().inflate(graphResId);
         mGraphId = graphResId;
         onGraphCreated();
@@ -369,16 +373,20 @@ public class NavController {
         onGraphCreated();
     }
 
+    /**
+     * 当设置了Graph
+     */
     private void onGraphCreated() {
         if (mBackStackToRestore != null) {
             for (int destinationId : mBackStackToRestore) {
+                //将需要恢复回退栈的navDestination重新加入回退栈
                 NavDestination node = findDestination(destinationId);
-                if (node == null) {
-                    throw new IllegalStateException("unknown destination during restore: "
+                if (node == null) {throw new IllegalStateException("unknown destination during restore: "
                             + mContext.getResources().getResourceName(destinationId));
                 }
                 mBackStack.add(node);
             }
+            //添加至回退栈后清空
             mBackStackToRestore = null;
         }
         if (mGraph != null && mBackStack.isEmpty()) {
@@ -549,24 +557,27 @@ public class NavController {
         if (currentNode == null) {
             throw new IllegalStateException("no current navigation node");
         }
-        @IdRes int destId = resId;
+        int destId = resId;
+        //获取顶层的NavAction
         final NavAction navAction = currentNode.getAction(resId);
         if (navAction != null) {
             if (navOptions == null) {
                 navOptions = navAction.getNavOptions();
             }
+            //通过NavAction获取目的地id
             destId = navAction.getDestinationId();
         }
+        //若destId为0而navOptions又不为null则弹出到该navOptions的指定的页面
         if (destId == 0 && navOptions != null && navOptions.getPopUpTo() != 0) {
             popBackStack(navOptions.getPopUpTo(), navOptions.isPopUpToInclusive());
             return;
         }
-
+        //为0报错
         if (destId == 0) {
-            throw new IllegalArgumentException("Destination id == 0 can only be used"
-                    + " in conjunction with navOptions.popUpTo != 0");
+            throw new IllegalArgumentException("Destination id == 0 can only be used" + " in conjunction with navOptions.popUpTo != 0");
         }
 
+        //找到准备前往的目的地
         NavDestination node = findDestination(destId);
         if (node == null) {
             final String dest = NavDestination.getDisplayName(mContext, destId);
@@ -577,14 +588,17 @@ public class NavController {
                     + " is unknown to this NavController");
         }
         if (navOptions != null) {
+            //是否清除回退栈
             if (navOptions.shouldClearTask()) {
-                // Start with a clean slate
                 popBackStack(0, true);
                 mBackStack.clear();
             } else if (navOptions.getPopUpTo() != 0) {
+                //导航之前弹出栈到指定栈
+                // 是否将该页面也弹出
                 popBackStack(navOptions.getPopUpTo(), navOptions.isPopUpToInclusive());
             }
         }
+        //进行导航
         node.navigate(args, navOptions);
     }
 
@@ -602,7 +616,7 @@ public class NavController {
      *
      * @param directions directions that describe this navigation operation
      */
-    public void navigate(@NonNull NavDirections directions, @Nullable NavOptions navOptions) {
+    public void navigate(NavDirections directions,NavOptions navOptions) {
         navigate(directions.getActionId(), directions.getArguments(), navOptions);
     }
     /**
@@ -615,22 +629,20 @@ public class NavController {
         return new NavDeepLinkBuilder(this);
     }
 
+
+
     /**
-     * Saves all navigation controller state to a Bundle.
-     *
-     * <p>State may be restored from a bundle returned from this method by calling
-     * {@link #restoreState(Bundle)}. Saving controller state is the responsibility
-     * of a {@link NavHost}.</p>
-     *
-     * @return saved state for this controller
+     * 在NavHostFragment中触发onSaveInstanceState时调用
+     * 将所有导航控制器状态保存到Bundle
      */
-    @Nullable
     public Bundle saveState() {
         Bundle b = null;
+        //保存Graph
         if (mGraphId != 0) {
             b = new Bundle();
             b.putInt(KEY_GRAPH_ID, mGraphId);
         }
+        //保存回退栈中destination的id
         if (!mBackStack.isEmpty()) {
             if (b == null) {
                 b = new Bundle();
@@ -646,23 +658,20 @@ public class NavController {
     }
 
     /**
-     * Restores all navigation controller state from a bundle.
+     * 由{@link NavHostFragment#onCreate(Bundle)}
      *
-     * <p>State may be saved to a bundle by calling {@link #saveState()}.
-     * Restoring controller state is the responsibility of a {@link NavHost}.</p>
-     *
-     * @param navState state bundle to restore
+     * 保存了Controller的状态
      */
-    public void restoreState(@Nullable Bundle navState) {
+    public void restoreState(Bundle navState) {
         if (navState == null) {
             return;
         }
-
+        //恢复了graphId
         mGraphId = navState.getInt(KEY_GRAPH_ID);
+        //保存的回退栈
         mBackStackToRestore = navState.getIntArray(KEY_BACK_STACK_IDS);
         if (mGraphId != 0) {
-            // Set the graph right away, onGraphCreated will re-add the back stack
-            // from mBackStackToRestore
+            //不为0立即设置graph
             setGraph(mGraphId);
         }
     }
