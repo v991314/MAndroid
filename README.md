@@ -4,11 +4,9 @@
 
 ### Retrofit
 
-[Retrofit类图](https://github.com/me94me/mandroid/blob/master/PreferredLibrary/Retrofit/Article/Retrofit%E7%B1%BB%E5%9B%BE.pdf)
+[Retrofit源码解析](https://github.com/me94me/Mandroid/tree/master/PreferredLibrary/Retrofit/example_retrofit_source)
 
-[Retrofit源码解析](https://github.com/me94me/mandroid/tree/master/PreferredLibrary/Retrofit/example_retrofit_source)
-
-[Retrofit与LiveData结合使用](https://github.com/me94me/mandroid/blob/master/PreferredLibrary/Retrofit/Article/Retrofit%E4%B8%8ELiveData%E7%BB%93%E5%90%88.md)
+> [Retrofit与LiveData结合使用](https://github.com/me94me/mandroid/blob/master/PreferredLibrary/Retrofit/Article/Retrofit%E4%B8%8ELiveData%E7%BB%93%E5%90%88.md)
 
 ### Navigation
 
