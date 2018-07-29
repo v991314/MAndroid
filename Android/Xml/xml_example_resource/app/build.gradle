@@ -5,12 +5,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.1"
     defaultConfig {
-        applicationId "com.me94me.example_navigatioin_resource"
-        minSdkVersion 15
-        targetSdkVersion 27
+        applicationId "com.me94me.xml_example_reosurce"
+        minSdkVersion 19
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -31,9 +31,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
-
-    implementation 'android.arch.navigation:navigation-fragment-ktx:1.0.0-alpha04'
-    implementation 'android.arch.navigation:navigation-fragment:1.0.0-alpha04'
-    implementation 'android.arch.navigation:navigation-ui:1.0.0-alpha04'
-    implementation 'android.arch.navigation:navigation-ui-ktx:1.0.0-alpha04'
+//    implementation 'com.android.support:appcompat-v7:27.1.1'
 }

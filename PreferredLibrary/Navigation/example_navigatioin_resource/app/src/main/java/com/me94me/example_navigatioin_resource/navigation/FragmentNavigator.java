@@ -4,25 +4,16 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.AttributeSet;
 
 import java.util.HashMap;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigator;
-import androidx.navigation.NavigatorProvider;
+import androidx.fragment.app.FragmentTransaction;
 
 /**
+ *
  * Navigator that navigates through {@link FragmentTransaction fragment transactions}. Every
  * destination using this Navigator must set a valid Fragment class name with
  * <code>android:name</code> or {@link Destination#setFragmentClass}.
@@ -72,14 +63,14 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
         return mFragmentManager.popBackStackImmediate();
     }
 
-    @NonNull
+
     @Override
     public Destination createDestination() {
         return new Destination(this);
     }
 
-    @NonNull
-    private String getBackStackName(@IdRes int destinationId) {
+
+    private String getBackStackName(int destinationId) {
         // This gives us the resource name if it exists,
         // or just the destinationId if it doesn't exist
         try {
@@ -88,6 +79,7 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
             return Integer.toString(destinationId);
         }
     }
+
 
     @Override
     public void navigate(Destination destination,Bundle args,NavOptions navOptions) {
@@ -112,7 +104,7 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
         if (oldState != null) {
             ft.remove(oldState);
         }
-        final @IdRes int destId = destination.getId();
+        final int destId = destination.getId();
         final StateFragment newState = new StateFragment();
         newState.mCurrentDestId = destId;
         ft.add(newState, StateFragment.FRAGMENT_TAG);
@@ -158,7 +150,7 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
          * @param navigatorProvider The {@link NavController} which this destination
          *                          will be associated with.
          */
-        public Destination(@NonNull NavigatorProvider navigatorProvider) {
+        public Destination(NavigatorProvider navigatorProvider) {
             this(navigatorProvider.getNavigator(FragmentNavigator.class));
         }
 
@@ -171,12 +163,12 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
          *                          {@link NavController}'s
          *                          {@link NavigatorProvider#getNavigator(Class)} method.
          */
-        public Destination(@NonNull Navigator<? extends Destination> fragmentNavigator) {
+        public Destination( Navigator<? extends Destination> fragmentNavigator) {
             super(fragmentNavigator);
         }
 
         @Override
-        public void onInflate(@NonNull Context context, @NonNull AttributeSet attrs) {
+        public void onInflate(Context context, AttributeSet attrs) {
             super.onInflate(context, attrs);
             TypedArray a = context.getResources().obtainAttributes(attrs,
                     R.styleable.FragmentNavigator);
@@ -229,7 +221,7 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
          * with this destination
          */
         @SuppressWarnings("ClassNewInstance")
-        public Fragment createFragment(@Nullable Bundle args) {
+        public Fragment createFragment( Bundle args) {
             Class<? extends Fragment> clazz = getFragmentClass();
             if (clazz == null) {
                 throw new IllegalStateException("fragment class not set");
@@ -254,7 +246,6 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
      *
      * @hide
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     public static class StateFragment extends Fragment {
         static final String FRAGMENT_TAG = "android-support-nav:FragmentNavigator.StateFragment";
 
@@ -263,7 +254,7 @@ public class FragmentNavigator extends Navigator<FragmentNavigator.Destination> 
         int mCurrentDestId;
 
         @Override
-        public void onCreate(@Nullable Bundle savedInstanceState) {
+        public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             if (savedInstanceState != null) {
                 mCurrentDestId = savedInstanceState.getInt(KEY_CURRENT_DEST_ID);

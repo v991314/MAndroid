@@ -68,7 +68,6 @@ public class NavInflater {
      *
      * @see #METADATA_KEY_GRAPH
      */
-    @Nullable
     public NavGraph inflateMetadataGraph() {
         final Bundle metaData = mContext.getApplicationInfo().metaData;
         if (metaData != null) {
@@ -80,21 +79,20 @@ public class NavInflater {
         return null;
     }
     /**
-     * Inflate a NavGraph from the given XML resource id.
+     * 从给定的XML资源id加载Graph
      *
-     * @param graphResId
-     * @return
+     * @param graphResId GraphId
+     * @return NavGraph
      */
-    @SuppressLint("ResourceType")
-    public NavGraph inflate(@NavigationRes int graphResId) {
+    public NavGraph inflate(int graphResId) {
+        //mContext从构造方法传入
         Resources res = mContext.getResources();
         XmlResourceParser parser = res.getXml(graphResId);
         final AttributeSet attrs = Xml.asAttributeSet(parser);
         try {
             int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                // Empty loop
+            while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
+                //空循环
             }
             if (type != XmlPullParser.START_TAG) {
                 throw new XmlPullParserException("No start tag found");

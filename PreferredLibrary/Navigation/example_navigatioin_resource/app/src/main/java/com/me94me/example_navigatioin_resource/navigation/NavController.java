@@ -330,23 +330,18 @@ public class NavController {
         setGraph(getNavInflater().inflateMetadataGraph());
     }
 
-    /**
-     * Returns the {@link NavInflater inflater} for this controller.
-     *
-     * @return inflater for loading navigation resources
-     */
-    @NonNull
-    public NavInflater getNavInflater() {
-        if (mInflater == null) {
-            mInflater = new NavInflater(mContext, mNavigatorProvider);
-        }
-        return mInflater;
-    }
 
     /**
-     * 将{@link NavGraph 导航图}设置为指定的资源。
-     * 将替换任何当前导航图数据。
+     * 返回{@link NavInflater inflater}
      *
+     * @return navigation资源加载器
+     */
+    public NavInflater getNavInflater() {
+        if (mInflater == null) { mInflater = new NavInflater(mContext, mNavigatorProvider); }
+        return mInflater;
+    }
+    /**
+     * 设置GraphId并替换当前的Graph
      * @see #getNavInflater()
      * @see #setGraph(NavGraph)
      * @see #getGraph
@@ -358,16 +353,11 @@ public class NavController {
     }
 
     /**
-     * Sets the {@link NavGraph navigation graph} to the specified graph.
-     * Any current navigation graph data will be replaced.
-     *
-     * <p>The graph can be retrieved later via {@link #getGraph()}.</p>
-     *
-     * @param graph graph to set
+     * 设置Graph并替换当前的Graph
      * @see #setGraph(int)
      * @see #getGraph
      */
-    public void setGraph(@NonNull NavGraph graph) {
+    public void setGraph(NavGraph graph) {
         mGraph = graph;
         mGraphId = 0;
         onGraphCreated();

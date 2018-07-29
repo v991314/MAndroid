@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 
 /**
  * NavHostFragment在布局中提供了一个区域，用于进行自包含导航.
- *
+ * <p>
  * NavHostFragment旨在用作布局资源中的内容区域，用于定义应用程序围绕它的镶边
  *
  * <pre class="prettyprint">
@@ -38,10 +38,10 @@ import androidx.fragment.app.Fragment;
  *                 android:layout_gravity="start"/>
  *     </android.support.v4.widget.DrawerLayout>
  * </pre>
- *
+ * <p>
  * 每个NavHostFragment都有一个{@link NavController}，用于定义导航主机中的有效导航。
  * 这包括{@link NavGraph 导航图}以及导航状态，例如当前位置和后台堆栈，它们将与NavHostFragment本身一起保存和恢复
- *
+ * <p>
  * NavHostFragments在其视图子view的host中注册其导航控制器，
  * 以便任何后代可以通过{@link Navigation}帮助程序类的方法（例如{@link Navigation＃findNavController（View）}）获取控制器实例。
  * 在导航目标fragment中查看事件监听实现（例如{@link android.view.View.OnClickListener}）可以使用这些帮助程序基于用户交互进行导航，而无需与导航host建立紧密耦合
@@ -50,16 +50,23 @@ public class NavHostFragment extends Fragment implements NavHost {
 
     //保存了controller状态的bundle的key
     private static final String KEY_NAV_CONTROLLER_STATE = "android-support-nav:fragment:navControllerState";
+
     //保存该Fragment是不是HostFragment
     private static final String KEY_DEFAULT_NAV_HOST = "android-support-nav:fragment:defaultHost";
 
-
+    //将GraphId保存在arguments的key
     private static final String KEY_GRAPH_ID = "android-support-nav:fragment:graphId";
+
+
+    //NavController
+    private NavController mNavController;
+    //判断是否是HostFragment
+    private boolean mDefaultNavHost;
 
 
     /**
      * 找一个{@link NavController}给一个本地{@link Fragment}.
-     *
+     * <p>
      * 此方法将找到与此Fragment关联的{@link NavController}，首先查找给定Fragment的父链上的{@link NavHostFragment}。
      * 如果找不到{@link NavController}，此方法将查找此方法 片段的{@link Fragment＃getView（）视图层次结构}由{@link Navigation＃findNavController（View）}指定。
      *
@@ -70,6 +77,7 @@ public class NavHostFragment extends Fragment implements NavHost {
     public static NavController findNavController(Fragment fragment) {
         Fragment findFragment = fragment;
         while (findFragment != null) {
+            //直接通过NavHostFragment获取mNavHostFragment
             if (findFragment instanceof NavHostFragment) {
                 return ((NavHostFragment) findFragment).getNavController();
             }
@@ -86,19 +94,14 @@ public class NavHostFragment extends Fragment implements NavHost {
         if (view != null) {
             return Navigation.findNavController(view);
         }
-        throw new IllegalStateException("Fragment " + fragment+ " does not have a NavController set");
+        throw new IllegalStateException("Fragment " + fragment + " does not have a NavController set");
     }
-
-    private NavController mNavController;
-
-
-    // 保存和恢复的状态的时候判断是否是HostFragment
-    private boolean mDefaultNavHost;
 
 
     /**
-     * 使用{@link NavGraph}资源创建新的NavHostFragment实例。
-     * @param graphResId resource id of the navigation graph to inflate
+     * 创建一个新的NavHostFragment实例
+     *
+     * @param graphResId graph的资源Id
      * @return NavHostFragment实例
      */
     public static NavHostFragment create(int graphResId) {
@@ -116,11 +119,10 @@ public class NavHostFragment extends Fragment implements NavHost {
     }
 
     /**
-     * 返回此导航host的{@link NavController 导航控制器}。
-     * 此方法将返回null，直到调用此HostFragment的{@link #onCreate（Bundle）}并且它有机会从先前的实例状态恢复。
+     * 在调用{@link #onCreate(Bundle)}之前返回null
      *
-     * @return host 的导航控制器
-     * @throws IllegalStateException if called before {@link #onCreate(Bundle)}
+     * @return controller
+     * @throws IllegalStateException 在{@link #onCreate(Bundle)}之前调用
      */
     @Override
     public NavController getNavController() {
@@ -131,10 +133,10 @@ public class NavHostFragment extends Fragment implements NavHost {
     }
 
     /**
-     * 按资源ID为此导航host的{@link NavController}设置{@link NavGraph}。
-     * 现有graph将被替换。
+     * Graph_Id:若mNavController为null保存在NavHostFragment的arguments
+     * 若mNavController不为null则立即设置
      *
-     * @param graphResId resource id of the navigation graph to inflate
+     * @param graphResId graph的资源Id
      */
     public void setGraph(int graphResId) {
         if (mNavController == null) {
@@ -202,6 +204,7 @@ public class NavHostFragment extends Fragment implements NavHost {
      * 创建此NavHostFragment将使用的FragmentNavigator。
      * 默认情况下，它使用{@link FragmentNavigator}，它取代了NavHostFragment的全部内容。
      * 这只在{@link #onCreate（Bundle）}中调用一次，不应该由子类直接调用。
+     *
      * @return a new instance of a FragmentNavigator
      */
     protected Navigator<? extends FragmentNavigator.Destination> createFragmentNavigator() {
@@ -210,7 +213,7 @@ public class NavHostFragment extends Fragment implements NavHost {
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout frameLayout = new FrameLayout(inflater.getContext());
         // 当通过XML添加时，这没有任何效果（因为此FrameLayout会自动获得ID），
         // 但是这确保了View在作为子fragment事务所需的编程方式添加NavHostFragment的情况下作为此Fragment的View层次结构的一部分存在
@@ -231,7 +234,6 @@ public class NavHostFragment extends Fragment implements NavHost {
         //在Navigation中findNavController就是在这里设置的
         Navigation.setViewNavController(rootView, mNavController);
     }
-
 
 
     /**
@@ -273,7 +275,6 @@ public class NavHostFragment extends Fragment implements NavHost {
     }
 
 
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -286,7 +287,7 @@ public class NavHostFragment extends Fragment implements NavHost {
         }
         //在加载布局中获取的
         //如果是默认host,保存为true
-            if (mDefaultNavHost) {
+        if (mDefaultNavHost) {
             outState.putBoolean(KEY_DEFAULT_NAV_HOST, true);
         }
     }
