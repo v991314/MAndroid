@@ -17,16 +17,9 @@ package com.me94me.xml_example_reosurce;
 
 import android.animation.Animator;
 import android.animation.StateListAnimator;
-import android.annotation.AnyRes;
-import android.annotation.AttrRes;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.PluralsRes;
-import android.annotation.RawRes;
-import android.annotation.StyleRes;
-import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
@@ -38,16 +31,12 @@ import android.icu.text.PluralRules;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.LongSparseArray;
-import android.util.Slog;
-import android.util.TypedValue;
 import android.util.Xml;
-import android.view.DisplayAdjustments;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -158,8 +147,8 @@ public class ResourcesImpl {
      * @param displayAdjustments this resource's Display override and compatibility info.
      *                           Must not be null.
      */
-    public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
-                         @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
+    public ResourcesImpl(AssetManager assets, DisplayMetrics metrics,
+                         Configuration config, DisplayAdjustments displayAdjustments) {
         mAssets = assets;
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
@@ -203,8 +192,14 @@ public class ResourcesImpl {
         }
     }
 
-    void getValue(@AnyRes int id, TypedValue outValue, boolean resolveRefs)
-            throws NotFoundException {
+    /**
+     * 获取Id对应的值
+     * @param id id
+     * @param outValue TypedValue
+     * @param resolveRefs boolean false
+     * @throws NotFoundException 未找到文件
+     */
+    void getValue(int id, TypedValue outValue, boolean resolveRefs) throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);
         if (found) {
             return;
@@ -1109,14 +1104,14 @@ public class ResourcesImpl {
     }
 
     /**
-     * Loads an XML parser for the specified file.
+     * 从file加载XmlResourceParser
      *
-     * @param file        the path for the XML file to parse
-     * @param id          the resource identifier for the file
+     * @param file        file的路径
+     * @param id          file的id
      * @param assetCookie the asset cookie for the file
-     * @param type        the type of resource (used for logging)
-     * @return a parser for the specified XML file
-     * @throws NotFoundException if the file could not be loaded
+     * @param type        资源类型，用于记录
+     * @return XmlResourceParser
+     * @throws NotFoundException 文件不能被加载
      */
     XmlResourceParser loadXmlResourceParser(String file, int id, int assetCookie, String type)
             throws NotFoundException {
@@ -1126,11 +1121,10 @@ public class ResourcesImpl {
                     final int[] cachedXmlBlockCookies = mCachedXmlBlockCookies;
                     final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
                     final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
-                    // First see if this block is in our cache.
+                    //首先看看这个块是否在我们的缓存中
                     final int num = cachedXmlBlockFiles.length;
                     for (int i = 0; i < num; i++) {
-                        if (cachedXmlBlockCookies[i] == assetCookie && cachedXmlBlockFiles[i] != null
-                                && cachedXmlBlockFiles[i].equals(file)) {
+                        if (cachedXmlBlockCookies[i] == assetCookie && cachedXmlBlockFiles[i] != null && cachedXmlBlockFiles[i].equals(file)) {
                             return cachedXmlBlocks[i].newParser();
                         }
                     }

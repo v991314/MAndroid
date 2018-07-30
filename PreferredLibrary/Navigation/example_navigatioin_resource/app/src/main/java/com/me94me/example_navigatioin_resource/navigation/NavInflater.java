@@ -99,6 +99,7 @@ public class NavInflater {
             }
 
             String rootElement = parser.getName();
+            //获取NavDestination
             NavDestination destination = inflate(res, parser, attrs);
             if (!(destination instanceof NavGraph)) {
                 throw new IllegalArgumentException("Root element <" + rootElement + ">"
@@ -114,13 +115,24 @@ public class NavInflater {
         }
     }
 
+    /**
+     * 加载NavDestination
+     * @param res Resources
+     * @param parser XmlResourceParser
+     * @param attrs AttributeSet
+     * @return NavDestination
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private NavDestination inflate(Resources res, XmlResourceParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
+        //获取navigator
         Navigator navigator = mNavigatorProvider.getNavigator(parser.getName());
+        //创建节点
         final NavDestination dest = navigator.createDestination();
-
+        //加载每个节点，通过attrs获取每个destination的id和label
         dest.onInflate(mContext, attrs);
-
+        //parser的深度
         final int innerDepth = parser.getDepth() + 1;
         int type;
         int depth;
@@ -137,24 +149,35 @@ public class NavInflater {
 
             final String name = parser.getName();
             if (TAG_ARGUMENT.equals(name)) {
+                //加载参数
                 inflateArgument(res, dest, attrs);
             } else if (TAG_DEEP_LINK.equals(name)) {
+                //加载深度链接
                 inflateDeepLink(res, dest, attrs);
             } else if (TAG_ACTION.equals(name)) {
+                //加载Action
                 inflateAction(res, dest, attrs);
-            } else if (TAG_INCLUDE.equals(name) && dest instanceof NavGraph) {
+            } else if (TAG_INCLUDE.equals(name) && dest instanceof NavGraph) {//如果子节点为graph加载子节点的destination
                 final TypedArray a = res.obtainAttributes(attrs, R.styleable.NavInclude);
                 final int id = a.getResourceId(R.styleable.NavInclude_graph, 0);
                 ((NavGraph) dest).addDestination(inflate(id));
                 a.recycle();
             } else if (dest instanceof NavGraph) {
+                //如果子节点为graph加载子节点的destination
+                //向每个NavGraph中加入Destination
                 ((NavGraph) dest).addDestination(inflate(res, parser, attrs));
             }
         }
-
         return dest;
     }
 
+    /**
+     * 加载参数
+     * @param res
+     * @param dest
+     * @param attrs
+     * @throws XmlPullParserException
+     */
     private void inflateArgument(Resources res, NavDestination dest, AttributeSet attrs)
             throws XmlPullParserException {
         final TypedArray a = res.obtainAttributes(attrs, R.styleable.NavArgument);

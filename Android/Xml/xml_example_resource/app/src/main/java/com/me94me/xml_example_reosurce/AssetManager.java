@@ -16,19 +16,11 @@
 
 package com.me94me.xml_example_reosurce;
 
-import android.annotation.AnyRes;
-import android.annotation.ArrayRes;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.StringRes;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration.NativeConfig;
+
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
-
-import dalvik.annotation.optimization.FastNative;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,6 +72,7 @@ public final class AssetManager implements AutoCloseable {
     // For communication with native code.
     private long mObject;
 
+    //保存String数据的数组
     private StringBlock mStringBlocks[] = null;
     
     private int mNumRefs = 1;
@@ -203,38 +196,40 @@ public final class AssetManager implements AutoCloseable {
      * @param resId the resource identifier of the string array
      * @return the string array, or {@code null}
      */
-    @Nullable
     final String[] getResourceStringArray(@ArrayRes int resId) {
         return getArrayStringResource(resId);
     }
 
     /**
-     * Populates {@code outValue} with the data associated a particular
-     * resource identifier for the current configuration.
+     * 基于当前配置将资源Id关联的数据保存到{@code outValue}。
      *
-     * @param resId the resource identifier to load
-     * @param densityDpi the density bucket for which to load the resource
-     * @param outValue the typed value in which to put the data
-     * @param resolveRefs {@code true} to resolve references, {@code false}
-     *                    to leave them unresolved
-     * @return {@code true} if the data was loaded into {@code outValue},
-     *         {@code false} otherwise
+     * @param resId 加载的资源Id
+     * @param densityDpi dpi
+     * @param outValue 保存数据的TypedValue
+     * @param resolveRefs true解析，false不解析
+     * @return 数据加载到{@code outValue}返回true，不然false
      */
-    final boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
+    final boolean getResourceValue(int resId, int densityDpi, TypedValue outValue,
             boolean resolveRefs) {
         synchronized (this) {
+            //loadResourceValue是底层方法
+            //如果找到资源，则返回true，填充mRetStringBlock和mRetData
             final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
+            //小于0未找到资源
             if (block < 0) {
                 return false;
             }
-
-            // Convert the changing configurations flags populated by native code.
-            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
-                    outValue.changingConfigurations);
+            //native code 会修改该值，这里赋予最新的值
+            outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(outValue.changingConfigurations);
 
             if (outValue.type == TypedValue.TYPE_STRING) {
+                //如果TypedValue包含有string，TypedValue的string会保存那个值
+                //mStringBlocks由native code 赋值,block为序列号
+                //mStringBlocks[block]返回的值为StringBlock
+                //outValue.data为outValue.string的序列号
                 outValue.string = mStringBlocks[block].get(outValue.data);
             }
+
             return true;
         }
     }
@@ -811,10 +806,9 @@ public final class AssetManager implements AutoCloseable {
     private native final long getAssetLength(long asset);
     private native final long getAssetRemainingLength(long asset);
 
-    /** Returns true if the resource was found, filling in mRetStringBlock and
-     *  mRetData. */
-    private native final int loadResourceValue(int ident, short density, TypedValue outValue,
-            boolean resolve);
+    /** 如果找到资源，填充mRetStringBlock和mRetData  */
+    private native final int loadResourceValue(int ident, short density, TypedValue outValue, boolean resolve);
+
     /** Returns true if the resource was found, filling in mRetStringBlock and
      *  mRetData. */
     private native final int loadResourceBagValue(int ident, int bagEntryId, TypedValue outValue,

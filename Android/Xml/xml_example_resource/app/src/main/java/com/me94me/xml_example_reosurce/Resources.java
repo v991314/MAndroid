@@ -112,11 +112,12 @@ public class Resources {
     /** Used to inflate drawable objects from XML. */
     private DrawableInflater mDrawableInflater;
 
-    /** Lock object used to protect access to {@link #mTmpValue}. */
-    private final Object mTmpValueLock = new Object();
 
-    /** Single-item pool used to minimize TypedValue allocations. */
+    /** 锁定对象用于保护对{@link #mTmpValue}的访问。 */
+    private final Object mTmpValueLock = new Object();
+    /** 用于最小化TypedValue分配的单项池。 */
     private TypedValue mTmpValue = new TypedValue();
+
 
     final ClassLoader mClassLoader;
 
@@ -244,8 +245,7 @@ public class Resources {
         final Configuration config = new Configuration();
         config.setToDefaults();
 
-        mResourcesImpl = new ResourcesImpl(AssetManager.getSystem(), metrics, config,
-                new DisplayAdjustments());
+        mResourcesImpl = new ResourcesImpl(AssetManager.getSystem(), metrics, config,new DisplayAdjustments());
     }
 
     /**
@@ -368,8 +368,8 @@ public class Resources {
                 + Integer.toHexString(id));
     }
 
-    @NonNull
-    Typeface getFont(@NonNull TypedValue value, @FontRes int id) throws NotFoundException {
+
+    Typeface getFont(TypedValue value, int id) throws NotFoundException {
         return mResourcesImpl.loadFont(this, value, id);
     }
 
@@ -408,7 +408,6 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information.
      */
-    @NonNull
     public CharSequence getQuantityText(@PluralsRes int id, int quantity)
             throws NotFoundException {
         return mResourcesImpl.getQuantityText(id, quantity);
@@ -428,8 +427,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      *         stripped of styled text information.
      */
-    @NonNull
-    public String getString(@StringRes int id) throws NotFoundException {
+    public String getString(int id) throws NotFoundException {
         return getText(id).toString();
     }
 
@@ -452,8 +450,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      *         stripped of styled text information.
      */
-    @NonNull
-    public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
+    public String getString(int id, Object... formatArgs) throws NotFoundException {
         final String raw = getString(id);
         return String.format(mResourcesImpl.getConfiguration().getLocales().get(0), raw,
                 formatArgs);
@@ -484,8 +481,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    @NonNull
-    public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
+    public String getQuantityString(int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
         return String.format(mResourcesImpl.getConfiguration().getLocales().get(0), raw,
@@ -512,8 +508,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    @NonNull
-    public String getQuantityString(@PluralsRes int id, int quantity) throws NotFoundException {
+    public String getQuantityString(int id, int quantity) throws NotFoundException {
         return getQuantityText(id, quantity).toString();
     }
 
@@ -1192,10 +1187,10 @@ public class Resources {
     }
 
     /**
-     * Returns a TypedValue suitable for temporary use. The obtained TypedValue
-     * should be released using {@link #releaseTempTypedValue(TypedValue)}.
-     *
-     * @return a typed value suitable for temporary use
+     * 从mTmpValue取出,若为null新建一个,释放的时候放入mTmpValue
+     * 返回一个TypedValue作为临时使用
+     * 应使用{@link #releaseTempTypedValue(TypedValue)}释放
+     * @return TypedValue
      */
     private TypedValue obtainTempTypedValue() {
         TypedValue tmpValue = null;
@@ -1212,10 +1207,9 @@ public class Resources {
     }
 
     /**
-     * Returns a TypedValue to the pool. After calling this method, the
-     * specified TypedValue should no longer be accessed.
+     * 调用此方法后，不应再访问指定的TypedValue。
      *
-     * @param value the typed value to return to the pool
+     * @param value value
      */
     private void releaseTempTypedValue(TypedValue value) {
         synchronized (mTmpValueLock) {
@@ -2098,50 +2092,44 @@ public class Resources {
 
 
     /**
-     * Return an XmlResourceParser through which you can read a generic XML
-     * resource for the given resource ID.
+     * 通过给定的资源ID返回一个可以读取XML的XmlResourceParser
+     * XmlPllParser只实现一些有限的功能
      *
-     * <p>The XmlPullParser implementation returned here has some limited
-     * functionality.  In particular, you can't change its input, and only
-     * high-level parsing events are available (since the document was
-     * pre-parsed for you at build time, which involved merging text and
-     * stripping comments).
+     * XmlPllParser无法更改其输入，并且只能使用高级解析事件
+     * 因为文档在构建时已为您预解析，其中包括合并文本和剥离注释
      *
-     * @param id The desired resource identifier, as generated by the aapt
-     *           tool. This integer encodes the package, type, and resource
-     *           entry. The value 0 is an invalid identifier.
+     * @param id Id不能为0
      *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     *
-     * @return A new parser object through which you can read
-     *         the XML data.
-     *
+     * @throws NotFoundException 给定的Id不存在
      * @see android.util.AttributeSet
      */
     public XmlResourceParser getXml(int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
     /**
-     * Loads an XML parser for the specified file.
+     * 从特定的文件加载XmlResourceParser
      *
-     * @param id the resource identifier for the file
-     * @param type the type of resource (used for logging)
-     * @return a parser for the specified XML file
-     * @throws NotFoundException if the file could not be loaded
+     * @param id ID
+     * @param type 资源的类型,用于打印
+     * @return XmlResourceParser
+     * @throws NotFoundException 如果文件不能被加载
      */
-    XmlResourceParser loadXmlResourceParser(int id, String type)
-            throws NotFoundException {
+    XmlResourceParser loadXmlResourceParser(int id, String type) throws NotFoundException {
+        //用于动态类型化数据值的容器。
+        //主要与Resources一起用于保存资源值。
         final TypedValue value = obtainTempTypedValue();
         try {
+            //在Resources实例化的时候新建实例
             final ResourcesImpl impl = mResourcesImpl;
+            //获取id资源的路径
             impl.getValue(id, value, true);
             if (value.type == TypedValue.TYPE_STRING) {
-                return impl.loadXmlResourceParser(value.string.toString(), id,
-                        value.assetCookie, type);
+                return impl.loadXmlResourceParser(value.string.toString(), id, value.assetCookie, type);
             }
             throw new NotFoundException("Resource ID #0x" + Integer.toHexString(id)
                     + " type #0x" + Integer.toHexString(value.type) + " is not valid");
         } finally {
+            //释放value
             releaseTempTypedValue(value);
         }
     }

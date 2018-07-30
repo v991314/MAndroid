@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -64,6 +65,7 @@ public class NavDestination {
         mNavigator = navigator;
     }
     /**
+     * 在{@link NavInflater#inflate(Resources, XmlResourceParser, AttributeSet)}中调用
      * 当从资源文件加载目的地时调用
      *
      * @param context 上下文
