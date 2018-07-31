@@ -28,7 +28,7 @@ public class ActivityNavigator extends Navigator<ActivityNavigator.Destination> 
     private Context mContext;
     private Activity mHostActivity;
 
-    public ActivityNavigator(@NonNull Context context) {
+    public ActivityNavigator(Context context) {
         mContext = context;
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
@@ -39,12 +39,11 @@ public class ActivityNavigator extends Navigator<ActivityNavigator.Destination> 
         }
     }
 
-    @NonNull
+
     Context getContext() {
         return mContext;
     }
 
-    @NonNull
     @Override
     public Destination createDestination() {
         return new Destination(this);

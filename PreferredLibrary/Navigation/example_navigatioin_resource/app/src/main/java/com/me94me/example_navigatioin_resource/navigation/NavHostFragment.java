@@ -164,6 +164,12 @@ public class NavHostFragment extends Fragment implements NavHost {
         }
     }
 
+    /**
+     * 1，构建NavController实例
+     * 2，添加FragmentNavigator到SimpleNavigatorProvider
+     * 3，恢复状态
+     * @param savedInstanceState bundle
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -237,6 +243,7 @@ public class NavHostFragment extends Fragment implements NavHost {
 
 
     /**
+     * 加载布局中的navGraph和defaultNavHost
      * 当fragment被创建进行layout进行加载的时候调用
      */
     @Override
@@ -275,6 +282,12 @@ public class NavHostFragment extends Fragment implements NavHost {
     }
 
 
+    /**
+     * 保存状态:1,是否是Nav_host
+     *          2,保存navController的状态:
+     *              GraphId和回退栈中所有destinationId作为IntArray保存在outState
+     * @param outState outState
+     */
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);

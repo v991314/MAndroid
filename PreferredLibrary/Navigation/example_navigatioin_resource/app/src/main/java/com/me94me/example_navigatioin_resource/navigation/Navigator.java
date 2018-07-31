@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.me94me.example_navigatioin_resource.navigation;
 
 import static java.lang.annotation.ElementType.TYPE;
@@ -28,31 +12,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import androidx.annotation.IntDef;
+
 /**
  * Navigator定义了一种在应用程序中导航的机制。
  *
- * <p>Each Navigator sets the policy for a specific type of navigation, e.g.
- * {@link ActivityNavigator} knows how to launch into {@link NavDestination destinations}
- * backed by activities using {@link Context#startActivity(Intent) startActivity}.</p>
+ * 每一个navigator为导航指定了规则
+ * 比如{@link ActivityNavigator}知道使用{@link Context#startActivity(Intent) startActivity}导航到一个activity
  *
- * <p>Navigators should be able to manage their own back stack when navigating between two
- * destinations that belong to that navigator. The {@link NavController} manages a back stack of
- * navigators representing the current navigation stack across all navigators.</p>
+ * 当在两个destination导航时，navigators应该能够管理它们自己的回退栈
+ * {@link NavController}管理当前导航堆栈的所有导航器的后退堆栈。
  *
- * <p>Each Navigator should add the {@link Name Navigator.Name annotation} to their class. Any
- * custom attributes used by the associated {@link NavDestination destination} subclass should
- * have a name corresponding with the name of the Navigator, e.g., {@link ActivityNavigator} uses
- * <code>&lt;declare-styleable name="ActivityNavigator"&gt;</code></p>
+ * 每一个Navigator应该在类上添加{@link Name Navigator.Name}注解
  *
- * @param <D> the subclass of {@link NavDestination} used with this Navigator which can be used
- *           to hold any special data that will be needed to navigate to that destination.
- *           Examples include information about an intent to navigate to other activities,
- *           or a fragment class name to instantiate and swap to a new fragment.
+ * {@link NavDestination destination}子类使用的任何自定义属性都应具有与导航器名称对应的名称
  */
 public abstract class Navigator<D extends NavDestination> {
+
     /**
-     * This annotation should be added to each Navigator subclass to denote the default name used
-     * to register the Navigator with a {@link NavigatorProvider}.
+     * 该注解应该被添加到每一个navigator类上以表示用于在{@link NavigatorProvider}上注册的navigator的name
      *
      * @see NavigatorProvider#addNavigator(Navigator)
      * @see NavigatorProvider#getNavigator(Class)
@@ -63,127 +41,110 @@ public abstract class Navigator<D extends NavDestination> {
         String value();
     }
 
+    /**
+     * 影响回退事件的值
+     */
     @Retention(SOURCE)
     @IntDef({BACK_STACK_UNCHANGED, BACK_STACK_DESTINATION_ADDED, BACK_STACK_DESTINATION_POPPED})
     @interface BackStackEffect {}
 
     /**
-     * Indicator that the navigation event should not change the {@link NavController}'s back stack.
-     *
-     * <p>For example, a {@link NavOptions#shouldLaunchSingleTop() single top} navigation event may
-     * not result in a back stack change if the existing destination is on the top of the stack.</p>
-     *
+     * 表示导航事件不会改变{@link NavController}的回退栈
+     * 例如，如果现有目标位于堆栈顶部，则{@link NavOptions＃shouldLaunchSingleTop()}导航事件可能不会导致返回堆栈更改。
      * @see #dispatchOnNavigatorNavigated
      */
     public static final int BACK_STACK_UNCHANGED = 0;
 
     /**
-     * Indicator that the navigation event has added a new entry to the back stack. Only
-     * destinations added with this flag will be handled by {@link NavController#navigateUp()}.
-     *
+     * 表示导航事件会添加一个新值到回退事件
+     * 仅仅当destination拥有该flag才会被{@link NavController#navigateUp()}处理
      * @see #dispatchOnNavigatorNavigated
      */
     public static final int BACK_STACK_DESTINATION_ADDED = 1;
 
     /**
-     * Indicator that the navigation event has popped an entry off the back stack.
-     *
+     * 表示导航事件导航事件从回退栈中弹出了一个条目
      * @see #dispatchOnNavigatorNavigated
      */
     public static final int BACK_STACK_DESTINATION_POPPED = 2;
 
-    private final CopyOnWriteArrayList<OnNavigatorNavigatedListener> mOnNavigatedListeners =
-            new CopyOnWriteArrayList<>();
 
     /**
-     * Construct a new NavDestination associated with this Navigator.
+     * 创建一个与navigator关联的destination
      *
-     * <p>Any initialization of the destination should be done in the destination's constructor as
-     * it is not guaranteed that every destination will be created through this method.</p>
+     * 任何destination的初始化都在该destination的构造方法中完成，因为不能保证每个目标都将通过此方法创建
      * @return a new NavDestination
      */
-    @NonNull
     public abstract D createDestination();
 
     /**
-     * Navigate to a destination.
+     * 导航到一个目的地
+     * 在导航图上，请求导航到一个给定的与该navigator关联的目的地
+     * 这个方法不应该直接被调用，应该使用{@link NavController}
      *
-     * <p>Requests navigation to a given destination associated with this navigator in
-     * the navigation graph. This method generally should not be called directly;
-     * {@link NavController} will delegate to it when appropriate.</p>
-     *
-     * <p>Implementations should {@link #dispatchOnNavigatorNavigated} to notify
-     * listeners of the resulting navigation destination.</p>
+     * 实现类需要调用{@link #dispatchOnNavigatorNavigated}来通知监听器
      *
      * @param destination destination node to navigate to
      * @param args arguments to use for navigation
      * @param navOptions additional options for navigation
      */
-    public abstract void navigate(@NonNull D destination, @Nullable Bundle args,
-                                     @Nullable NavOptions navOptions);
+    public abstract void navigate( D destination, Bundle args,NavOptions navOptions);
+
 
     /**
-     * Attempt to pop this navigator's back stack, performing the appropriate navigation.
+     * 尝试弹出navigator的回退栈
      *
-     * <p>Implementations should {@link #dispatchOnNavigatorNavigated} to notify
-     * listeners of the resulting navigation destination and return {@code true} if navigation
-     * was successful. Implementations should return {@code false} if navigation could not
-     * be performed, for example if the navigator's back stack was empty.</p>
+     * 实现类应该调用{@link #dispatchOnNavigatorNavigated}通知监听器并且成功了返回true
+     * 如果导航未能正确执行返回false，例如navigator的回退栈为空
      *
      * @return {@code true} if pop was successful
      */
     public abstract boolean popBackStack();
 
+
+    //所有导航监听器
+    private final CopyOnWriteArrayList<OnNavigatorNavigatedListener> mOnNavigatedListeners = new CopyOnWriteArrayList<>();
+
     /**
-     * Add a listener to be notified when this navigator changes navigation destinations.
-     *
-     * <p>Most application code should use
-     * {@link NavController#addOnNavigatedListener(NavController.OnNavigatedListener)} instead.
-     * </p>
-     *
+     * 添加监听器
+     * 大多数application应该使用{@link NavController#addOnNavigatedListener(NavController.OnNavigatedListener)}
      * @param listener listener to add
      */
-    public final void addOnNavigatorNavigatedListener(
-            @NonNull OnNavigatorNavigatedListener listener) {
+    public final void addOnNavigatorNavigatedListener( OnNavigatorNavigatedListener listener) {
         mOnNavigatedListeners.add(listener);
     }
 
     /**
-     * Remove a listener so that it will no longer be notified when this navigator changes
-     * navigation destinations.
-     *
-     * @param listener listener to remove
+     * 移除一个监听器
+     * @param listener 将被移除的监听器
      */
-    public final void removeOnNavigatorNavigatedListener(
-            @NonNull OnNavigatorNavigatedListener listener) {
+    public final void removeOnNavigatorNavigatedListener(OnNavigatorNavigatedListener listener) {
         mOnNavigatedListeners.remove(listener);
     }
 
     /**
      * 将导航事件发送到所有已注册的{@link OnNavigatorNavigatedListener listeners}。导航器实现的功能。
-     * @param destId id of the new destination
-     * @param backStackEffect how the navigation event affects the back stack
+     * @param destId 新的目的地的Id
+     * @param backStackEffect 导航事件对回退栈产生了如何的影响
      */
-    public final void dispatchOnNavigatorNavigated(@IdRes int destId,
-            @BackStackEffect int backStackEffect) {
+    public final void dispatchOnNavigatorNavigated( int destId, @BackStackEffect int backStackEffect) {
         for (OnNavigatorNavigatedListener listener : mOnNavigatedListeners) {
             listener.onNavigatorNavigated(this, destId, backStackEffect);
         }
     }
 
     /**
-     * Listener for observing navigation events for this specific navigator. Most app code
-     * should use {@link NavController.OnNavigatedListener} instead.
+     * 观察导航器导航事件的监听器
+     * app代码应该使用{@link NavController.OnNavigatedListener}来监听
      */
     public interface OnNavigatorNavigatedListener {
         /**
-         * This method is called after the Navigator navigates to a new destination.
-         *
-         * @param navigator
-         * @param destId
+         * 当Navigator导航到了一个新目的地时调用
+         * @param navigator navigator
+         * @param destId destId
          * @param backStackEffect
          */
-        void onNavigatorNavigated(@NonNull Navigator navigator, @IdRes int destId,
+        void onNavigatorNavigated(Navigator navigator, int destId,
                 @BackStackEffect int backStackEffect);
     }
 }

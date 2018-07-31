@@ -51,7 +51,7 @@ public class NavInflater {
     private Context mContext;
     private NavigatorProvider mNavigatorProvider;
 
-    public NavInflater(@NonNull Context c, @NonNull NavigatorProvider navigatorProvider) {
+    public NavInflater(Context c, NavigatorProvider navigatorProvider) {
         mContext = c;
         mNavigatorProvider = navigatorProvider;
     }

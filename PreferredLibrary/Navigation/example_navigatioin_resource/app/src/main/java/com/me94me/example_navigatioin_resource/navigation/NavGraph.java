@@ -4,39 +4,34 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
-import android.support.v4.util.SparseArrayCompat;
 import android.util.AttributeSet;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import androidx.navigation.common.R;
+import androidx.collection.SparseArrayCompat;
 
 /**
- * NavGraph is a collection of {@link NavDestination} nodes fetchable by ID.
+ * NavGraph是一个通过Id获取{@link NavDestination}节点的集合
  *
- * <p>A NavGraph serves as a 'virtual' destination: while the NavGraph itself will not appear
- * on the back stack, navigating to the NavGraph will cause the
- * {@link #getStartDestination starting destination} to be added to the back stack.</p>
+ * NavGraph充当“虚拟”目的地
+ * 虽然NavGraph本身不会出现在后台堆栈上，但导航到该NavGraph将导致{@link #getStartDestination }起始目的地被添加到后台堆栈。
  */
 public class NavGraph extends NavDestination implements Iterable<NavDestination> {
+    //所有节点
     private final SparseArrayCompat<NavDestination> mNodes = new SparseArrayCompat<>();
+    //起点节点
     private int mStartDestId;
 
     /**
-     * Construct a new NavGraph. This NavGraph is not valid until you
-     * {@link #addDestination(NavDestination) add a destination} and
-     * {@link #setStartDestination(int) set the starting destination}.
+     * 构造一个NavGraph
+     * 只有NavGraph被调用了{@link #addDestination(NavDestination)}
+     * 并且设置了starting destination 才合法
      *
-     * @param navigatorProvider The {@link NavController} which this NavGraph
-     *                          will be associated with.
+     * @param navigatorProvider NavGraph关联的{@link NavController}
      */
-    public NavGraph(@NonNull NavigatorProvider navigatorProvider) {
+    public NavGraph(NavigatorProvider navigatorProvider) {
         this(navigatorProvider.getNavigator(NavGraphNavigator.class));
     }
 
@@ -50,7 +45,7 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
      *                          {@link NavController}'s
      *                          {@link NavigatorProvider#getNavigator(Class)} method.
      */
-    public NavGraph(@NonNull Navigator<? extends NavGraph> navGraphNavigator) {
+    public NavGraph( Navigator<? extends NavGraph> navGraphNavigator) {
         super(navGraphNavigator);
     }
 
@@ -92,7 +87,7 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
      *
      * @param node destination to add
      */
-    public void addDestination(@NonNull NavDestination node) {
+    public void addDestination(NavDestination node) {
         if (node.getId() == 0) {
             throw new IllegalArgumentException("Destinations must have an id."
                     + " Call setId() or include an android:id in your navigation XML.");
@@ -151,21 +146,25 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
     }
 
     /**
-     * Finds a destination in the collection by ID. This will recursively check the
-     * {@link #getParent() parent} of this navigation graph if node is not found in
-     * this navigation graph.
+     * 在Graph通过resid找到NavDestination
      *
      * @param resid ID to locate
-     * @return the node with ID resid
+     * @return NavDestination节点
      */
-    public NavDestination findNode(@IdRes int resid) {
+    public NavDestination findNode(int resid) {
         return findNode(resid, true);
     }
 
-    NavDestination findNode(@IdRes int resid, boolean searchParents) {
+    /**
+     * 寻找NavDestination
+     * @param resid 节点Id
+     * @param searchParents 是否查找父级Graph
+     * @return NavDestination
+     */
+    NavDestination findNode(int resid, boolean searchParents) {
+        //从当前Graph的所有节点中获取
         NavDestination destination = mNodes.get(resid);
-        // Search the parent for the NavDestination if it is not a child of this navigation graph
-        // and searchParents is true
+        //为null就从父级Graph从查找未找到返回null
         return destination != null
                 ? destination
                 : searchParents && getParent() != null ? getParent().findNode(resid) : null;
@@ -222,11 +221,11 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
     }
 
     /**
-     * Remove a given destination from this NavGraph
+     * 移除某个给定NavGraph的destination
      *
      * @param node the destination to remove.
      */
-    public void remove(@NonNull NavDestination node) {
+    public void remove(NavDestination node) {
         int index = mNodes.indexOfKey(node.getId());
         if (index >= 0) {
             mNodes.valueAt(index).setParent(null);
@@ -235,7 +234,7 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
     }
 
     /**
-     * Clear all destinations from this navigation graph.
+     * 清空graph的所有节点
      */
     public void clear() {
         Iterator<NavDestination> iterator = iterator();
@@ -246,21 +245,19 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
     }
 
     /**
-     * Returns the starting destination for this NavGraph. When navigating to the NavGraph, this
-     * destination is the one the user will initially see.
-     * @return
+     * 返回Graph的起点，当导航到该Graph时该起点会被初始化显示
+     * @return 起点的Id
      */
-    @IdRes
     public int getStartDestination() {
         return mStartDestId;
     }
 
     /**
-     * Sets the starting destination for this NavGraph.
+     * 设置NavGraph的起点
      *
-     * @param startDestId The id of the destination to be shown when navigating to this NavGraph.
+     * @param startDestId 当导航到该Graph时的DestinationId
      */
-    public void setStartDestination(@IdRes int startDestId) {
+    public void setStartDestination(int startDestId) {
         mStartDestId = startDestId;
     }
 }

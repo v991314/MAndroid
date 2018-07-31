@@ -47,34 +47,44 @@ public class NavController {
     private NavInflater mInflater;
     private NavGraph mGraph;
     private int mGraphId;
+    //保存的回退栈
     private int[] mBackStackToRestore;
 
     //回退栈,使用了双端队列
     private final Deque<NavDestination> mBackStack = new ArrayDeque<>();
 
     /**
+     * 保存了所有的Navigator
+     * 重写addNavigator移除之前navigator的监听器，添加现在navigator的监听器
      * 提供Navigator,在NavHostFragment的onCreate()中创建赋值
      */
     private final SimpleNavigatorProvider mNavigatorProvider = new SimpleNavigatorProvider() {
         @Override
         public Navigator<? extends NavDestination> addNavigator(String name,
                 Navigator<? extends NavDestination> navigator) {
+            //mNavigators.put(name, navigator)返回的hashMap返回的上一个与name关联的Navigator
+            //之前的Navigator
             Navigator<? extends NavDestination> previousNavigator = super.addNavigator(name, navigator);
+            //如果与当前navigator不一致
             if (previousNavigator != navigator) {
+                //移除之前的监听器
                 if (previousNavigator != null) {
                     previousNavigator.removeOnNavigatorNavigatedListener(mOnNavigatedListener);
                 }
+                //为现在的navigator添加的监听器
                 navigator.addOnNavigatorNavigatedListener(mOnNavigatedListener);
             }
+            //依然返回之前的navigator
             return previousNavigator;
         }
     };
 
-    private final Navigator.OnNavigatorNavigatedListener mOnNavigatedListener =
-            new Navigator.OnNavigatorNavigatedListener() {
+    /**
+     * OnNavigatorNavigatedListener导航监听器
+     */
+    private final Navigator.OnNavigatorNavigatedListener mOnNavigatedListener = new Navigator.OnNavigatorNavigatedListener() {
                 @Override
-                public void onNavigatorNavigated(Navigator navigator, @IdRes int destId,
-                        @Navigator.BackStackEffect int backStackEffect) {
+                public void onNavigatorNavigated(Navigator navigator, @IdRes int destId, @Navigator.BackStackEffect int backStackEffect) {
                     if (destId != 0) {
                         NavDestination newDest = findDestination(destId);
                         if (newDest == null) {
@@ -83,12 +93,13 @@ public class NavController {
                                     + NavDestination.getDisplayName(mContext, destId));
                         }
                         switch (backStackEffect) {
+                            //如果是移除就移除最后一个
                             case Navigator.BACK_STACK_DESTINATION_POPPED:
-                                while (!mBackStack.isEmpty()
-                                        && mBackStack.peekLast().getId() != destId) {
+                                while (!mBackStack.isEmpty() && mBackStack.peekLast().getId() != destId) {
                                     mBackStack.removeLast();
                                 }
                                 break;
+                                //如果是添加就添加一个NavDestination进入后退栈
                             case Navigator.BACK_STACK_DESTINATION_ADDED:
                                 mBackStack.add(newDest);
                                 break;
@@ -96,45 +107,39 @@ public class NavController {
                                 // Don't update the back stack and don't dispatchOnNavigated
                                 return;
                         }
+                        //分发导航事件
                         dispatchOnNavigated(newDest);
                     }
                 }
             };
+    /**
+     * 导航事件监听器集合
+     */
+    private final CopyOnWriteArrayList<OnNavigatedListener> mOnNavigatedListeners = new CopyOnWriteArrayList<>();
 
-    private final CopyOnWriteArrayList<OnNavigatedListener> mOnNavigatedListeners =
-            new CopyOnWriteArrayList<>();
 
     /**
-     * OnNavigatorNavigatedListener receives a callback when the associated controller
-     * navigates to a new destination.
+     * 导航接口
      */
     public interface OnNavigatedListener {
         /**
-         * onNavigatorNavigated is called when the controller navigates to a new destination.
-         * This navigation may be to a destination that has not been seen before, or one that
-         * was previously on the back stack. This method is called after navigation is complete,
-         * but associated transitions may still be playing.
-         *
-         * @param controller the controller that navigated
-         * @param destination the new destination
+         * 当导航完成了才调用，关联的transitions还是会执行
+         * @param controller 用于导航的controller
+         * @param destination 新的目的地
          */
         void onNavigated(NavController controller,NavDestination destination);
     }
 
+
     /**
-     * Constructs a new controller for a given {@link Context}. Controllers should not be
-     * used outside of their context and retain a hard reference to the context supplied.
-     * If you need a global controller, pass {@link Context#getApplicationContext()}.
+     * 使用context构造一个Controller
      *
-     * <p>Apps should generally not construct controllers, instead obtain a relevant controller
-     * directly from a navigation host via {@link NavHost#getNavController()} or by using one of
-     * the utility methods on the {@link Navigation} class.</p>
+     * 控制器不应在context之外使用，并保留对context的强引用。
+     * 如果你想一个全局controller，可以通过{@link Context#getApplicationContext()}
      *
-     * <p>Note that controllers that are not constructed with an {@link Activity} context
-     * (or a wrapped activity context) will only be able to navigate to
-     * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK new tasks} or
-     * {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT new document tasks} when
-     * navigating to new activities.</p>
+     * app通常不新建建控制器，而是通过{@link NavHost＃getNavController（）}
+     * 或使用{@link Navigation}类中的一种实用程序方法直接从navHost获取相关控制器。
+     *
      *
      * @param context context for this controller
      */
@@ -157,13 +162,10 @@ public class NavController {
     }
 
     /**
-     * Retrieve the NavController's {@link NavigatorProvider}. All {@link Navigator Navigators} used
-     * to construct the {@link NavGraph navigation graph} for this nav controller should be added
-     * to this navigator provider before the graph is constructed.
-     * <p>
-     * Generally, the Navigators are set for you by the {@link NavHost} hosting this NavController
-     * and you do not need to manually interact with the navigator provider.
-     * </p>
+     * 获取NavController的{@link NavigatorProvider}
+     * 用于构建此导航控制器的{@link NavGraph 导航图}的所有{@link Navigation Navigators}应在构建Graph之前添加到此NavigatorProvider
+     *
+     * 通常，导航器是由此NavController的{@link NavHost}设置的，无需手动与导航器提供程序进行交互
      * @return The {@link NavigatorProvider} used by this NavController.
      */
     @NonNull
@@ -172,15 +174,11 @@ public class NavController {
     }
 
     /**
-     * Adds an {@link OnNavigatedListener} to this controller to receive events when
-     * the controller navigates to a new destination.
-     *
-     * <p>The current destination, if any, will be immediately sent to your listener.</p>
-     *
+     * 添加{@link OnNavigatedListener}
      * @param listener the listener to receive events
      */
     public void addOnNavigatedListener(@NonNull OnNavigatedListener listener) {
-        // Inform the new listener of our current state, if any
+        //监听器会立即接收到当前的destination
         if (!mBackStack.isEmpty()) {
             listener.onNavigated(this, mBackStack.peekLast());
         }
@@ -188,9 +186,7 @@ public class NavController {
     }
 
     /**
-     * Removes an {@link OnNavigatedListener} from this controller. It will no longer
-     * receive navigation events.
-     *
+     * 移除监听器
      * @param listener the listener to remove
      */
     public void removeOnNavigatedListener(@NonNull OnNavigatedListener listener) {
@@ -198,10 +194,7 @@ public class NavController {
     }
 
     /**
-     * Attempts to pop the controller's back stack. Analogous to when the user presses
-     * the system {@link android.view.KeyEvent#KEYCODE_BACK Back} button when the associated
-     * navigation host has focus.
-     *
+     * 弹出回退栈
      * @return true if the stack was popped, false otherwise
      */
     public boolean popBackStack() {
@@ -220,7 +213,7 @@ public class NavController {
 
 
     /**
-     * 尝试将控制器的后退堆栈弹回特定目标。
+     * 将控制器的后退堆栈弹回特定目标。
      *
      * @param destinationId 保留的最高目的地
      * @param inclusive 是否也应弹出给定目的地。
@@ -235,17 +228,22 @@ public class NavController {
         Iterator<NavDestination> iterator = mBackStack.descendingIterator();
         while (iterator.hasNext()) {
             NavDestination destination = iterator.next();
+            //循环回退栈若不等于destinationId就加入需要移除的集合
+            //inclusive表示是否移除给定的destinationId
             if (inclusive || destination.getId() != destinationId) {
                 destinationsToRemove.add(destination);
             }
+            //等于的时候就停止加入
             if (destination.getId() == destinationId) {
                 break;
             }
         }
         boolean popped = false;
+        //循环需要移除的回退集合
         iterator = destinationsToRemove.iterator();
         while (iterator.hasNext()) {
             NavDestination destination = iterator.next();
+            //跳过已经移除的
             // Skip destinations already removed by a previous popBackStack operation
             while (!mBackStack.isEmpty() && mBackStack.peekLast().getId() != destination.getId()) {
                 if (iterator.hasNext()) {
@@ -255,6 +253,7 @@ public class NavController {
                     break;
                 }
             }
+            //移除destinationsToRemove所包含的destination
             if (destination != null) {
                 popped = destination.getNavigator().popBackStack() || popped;
             }
@@ -304,6 +303,10 @@ public class NavController {
         }
     }
 
+    /**
+     * 分发导航事件
+     * @param destination NavDestination
+     */
     void dispatchOnNavigated(NavDestination destination) {
         for (OnNavigatedListener listener : mOnNavigatedListeners) {
             listener.onNavigated(this, destination);
@@ -503,17 +506,22 @@ public class NavController {
         return mBackStack.peekLast();
     }
 
+
+    /**
+     * 根据destinationId找到NavDestination
+     */
     private NavDestination findDestination(@IdRes int destinationId) {
         if (mGraph == null) {
             return null;
         }
+        //如果是Graph返回
         if (mGraph.getId() == destinationId) {
             return mGraph;
         }
+        //当前的NavDestination
         NavDestination currentNode = mBackStack.isEmpty() ? mGraph : mBackStack.peekLast();
-        NavGraph currentGraph = currentNode instanceof NavGraph
-                ? (NavGraph) currentNode
-                : currentNode.getParent();
+        //如果currentNode是Graph就返回不是就getParent()获取Graph
+        NavGraph currentGraph = currentNode instanceof NavGraph ? (NavGraph) currentNode : currentNode.getParent();
         return currentGraph.findNode(destinationId);
     }
 
@@ -622,7 +630,8 @@ public class NavController {
 
 
     /**
-     * 在NavHostFragment中触发onSaveInstanceState时调用
+     *
+     * 在{@link NavHostFragment#onSaveInstanceState(Bundle)}调用
      * 将所有导航控制器状态保存到Bundle
      */
     public Bundle saveState() {

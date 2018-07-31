@@ -2,68 +2,55 @@
 package com.me94me.example_navigatioin_resource.navigation;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 /**
- * A NavigationProvider stores a set of {@link Navigator}s that are valid ways to navigate
- * to a destination.
+ * 保存了一个{@link Navigator}的集合
  */
 @SuppressLint("TypeParameterUnusedInFormals")
 public interface NavigatorProvider {
+
     /**
-     * Retrieves a registered {@link Navigator} using the name provided by the
-     * {@link Navigator.Name Navigator.Name annotation}.
+     * 使用navigator类获取{@link Navigator}
      *
      * @param navigatorClass class of the navigator to return
      * @return the registered navigator with the given {@link Navigator.Name}
      *
-     * @throws IllegalArgumentException if the Navigator does not have a
-     * {@link Navigator.Name Navigator.Name annotation}
-     * @throws IllegalStateException if the Navigator has not been added
+     * @throws IllegalArgumentException 如果navigator没有@link Navigator.Name Navigator.Name annotation}
+     * @throws IllegalStateException 如果navigator还没有添加
      *
      * @see #addNavigator(Navigator)
      */
-    @NonNull
-    <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(
-            @NonNull Class<T> navigatorClass);
+    <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(Class<T> navigatorClass);
 
     /**
-     * Retrieves a registered {@link Navigator} by name.
+     * 使用由{@link Navigator.Name Navigator.Name annotation}提供的name获取{@link Navigator}
      *
      * @param name name of the navigator to return
      * @return the registered navigator with the given name
      *
-     * @throws IllegalStateException if the Navigator has not been added
+     * @throws IllegalStateException 如果navigator还没有添加
      *
      * @see #addNavigator(String, Navigator)
      */
-    @NonNull
-    <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(
-            @NonNull String name);
+    <D extends NavDestination, T extends Navigator<? extends D>> T getNavigator(String name);
 
     /**
-     * Register a navigator using the name provided by the
-     * {@link Navigator.Name Navigator.Name annotation}. {@link NavDestination destinations} may
-     * refer to any registered navigator by name for inflation. If a navigator by this name is
-     * already registered, this new navigator will replace it.
-     *
-     * @param navigator navigator to add
-     * @return the previously added Navigator for the name provided by the
-     * {@link Navigator.Name Navigator.Name annotation}, if any
+     * 使用{@link Navigator.Name Navigator.Name annotation}提供的name注册navigator
+     * {@link NavDestination destinations}可以通过名称引用任何注册的导航器来进行inflate
+     * 如果已经注册了此名称的导航器，则此新导航器将替换它。
+     * @param navigator 将要添加的导航器
+     * @return 返回之前通过{@link Navigator.Name Navigator.Name annotation}注解添加的导航器
      */
     Navigator<? extends NavDestination> addNavigator(Navigator<? extends NavDestination> navigator);
 
     /**
-     * Register a navigator by name. {@link NavDestination destinations} may refer to any
-     * registered navigator by name for inflation. If a navigator by this name is already
-     * registered, this new navigator will replace it.
+     * 通过name注册一个导航器
+     * {@link NavDestination destinations}可以通过name引用这个导航器
+     * 如果已经注册了此name的导航器，则此新导航器将替换它。
      *
-     * @param name name for this navigator
-     * @param navigator navigator to add
-     * @return the previously added Navigator for the given name, if any
+     * @param name navigator的name
+     * @param navigator 将要添加的导航器
+     * @return 返回此名称之前的导航器
      */
-    @Nullable
-    Navigator<? extends NavDestination> addNavigator(@NonNull String name,
-            @NonNull Navigator<? extends NavDestination> navigator);
+    Navigator<? extends NavDestination> addNavigator(String name, Navigator<? extends NavDestination> navigator);
 }
