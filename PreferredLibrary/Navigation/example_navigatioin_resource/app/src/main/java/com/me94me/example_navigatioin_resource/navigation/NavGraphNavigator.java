@@ -1,38 +1,19 @@
-/*
- * Copyright (C) 2017 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.me94me.example_navigatioin_resource.navigation;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayDeque;
 
 /**
- * A Navigator built specifically for {@link NavGraph} elements. Handles navigating to the
- * correct destination when the NavGraph is the target of navigation actions.
+ * {@link NavGraph}元素的导航器
+ * 当NavGraph作为actions进行导航时的操作
  */
 @Navigator.Name("navigation")
 public class NavGraphNavigator extends Navigator<NavGraph> {
     private static final String KEY_BACK_STACK_IDS = "androidx-nav-graph:navigator:backStackIds";
-
     private Context mContext;
-    //回退栈(保存destinationId)
+    //回退栈(保存Graph的destinationId)
     private ArrayDeque<Integer> mBackStack = new ArrayDeque<>();
 
     /**
@@ -53,6 +34,7 @@ public class NavGraphNavigator extends Navigator<NavGraph> {
 
     @Override
     public void navigate(NavGraph destination,Bundle args,NavOptions navOptions) {
+        //找到第一个目的地
         int startId = destination.getStartDestination();
         if (startId == 0) {
             throw new IllegalStateException("no start destination defined via"
@@ -74,6 +56,7 @@ public class NavGraphNavigator extends Navigator<NavGraph> {
             mBackStack.add(destination.getId());
             dispatchOnNavigatorNavigated(destination.getId(), BACK_STACK_DESTINATION_ADDED);
         }
+        //通过该目的地自己的navigator进行导航
         startDestination.navigate(args, navOptions);
     }
 
@@ -115,7 +98,6 @@ public class NavGraphNavigator extends Navigator<NavGraph> {
     }
 
     @Override
-    @Nullable
     public Bundle onSaveState() {
         Bundle b = new Bundle();
         int[] backStack = new int[mBackStack.size()];
@@ -128,7 +110,7 @@ public class NavGraphNavigator extends Navigator<NavGraph> {
     }
 
     @Override
-    public void onRestoreState(@Nullable Bundle savedState) {
+    public void onRestoreState(Bundle savedState) {
         if (savedState != null) {
             int[] backStack = savedState.getIntArray(KEY_BACK_STACK_IDS);
             if (backStack != null) {

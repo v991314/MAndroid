@@ -6,9 +6,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
-import android.support.annotation.NavigationRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -24,19 +21,11 @@ import java.io.IOException;
  */
 public class NavInflater {
     /**
-     * Metadata key for defining an app's default navigation graph.
-     *
-     * <p>Applications may declare a graph resource in their manifest instead of declaring
-     * or passing this data to each host or controller:</p>
+     * manifest文件中默认的graph的key
      *
      * <pre class="prettyprint">
      *     <meta-data android:name="android.nav.graph" android:resource="@xml/my_nav_graph" />
      * </pre>
-     *
-     * <p>A graph resource declared in this manner can be inflated into a controller by calling
-     * {@link NavController#setMetadataGraph()} or directly via {@link #inflateMetadataGraph()}.
-     * Navigation host implementations should do this automatically
-     * if no navigation resource is otherwise supplied during host configuration.</p>
      */
     public static final String METADATA_KEY_GRAPH = "android.nav.graph";
 
@@ -57,10 +46,9 @@ public class NavInflater {
     }
 
     /**
-     * Inflates {@link NavGraph navigation graph} as specified in the application manifest.
+     * 加载在manifest的{@link NavGraph navigation graph}
      *
-     * <p>Applications may declare a graph resource in their manifest instead of declaring
-     * or passing this data to each host or controller:</p>
+     * 可以在其manifest中声明graph资源，而不是将此数据声明或传递给每个host或controller
      *
      * <pre class="prettyprint">
      *     <meta-data android:name="android.nav.graph" android:resource="@xml/my_nav_graph" />
@@ -116,6 +104,9 @@ public class NavInflater {
     }
 
     /**
+     * 1,根据XmlResourceParser的name获取相应的navigator
+     * 2,使用navigator创建所有节点
+     * 3,加载每个节点的属性
      * 加载NavDestination
      * @param res Resources
      * @param parser XmlResourceParser

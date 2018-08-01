@@ -314,17 +314,10 @@ public class NavController {
     }
 
     /**
-     * Sets the {@link NavGraph navigation graph} as specified in the application manifest.
-     *
-     * <p>Applications may declare a graph resource in their manifest instead of declaring
-     * or passing this data to each host or controller:</p>
-     *
+     * 加载manifest中graph资源文件
      * <pre class="prettyprint">
      *     <meta-data android:name="android.nav.graph" android:resource="@xml/my_nav_graph" />
      * </pre>
-     *
-     * <p>The inflated graph can be retrieved via {@link #getGraph()}.</p>
-     *
      * @see NavInflater#METADATA_KEY_GRAPH
      * @see NavInflater#inflateMetadataGraph()
      * @see #getGraph

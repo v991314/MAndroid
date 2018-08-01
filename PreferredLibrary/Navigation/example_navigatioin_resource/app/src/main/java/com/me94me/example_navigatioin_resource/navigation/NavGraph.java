@@ -136,7 +136,7 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
      *
      * @param nodes destinations to add
      */
-    public void addDestinations(@NonNull NavDestination... nodes) {
+    public void addDestinations(NavDestination... nodes) {
         for (NavDestination node : nodes) {
             if (node == null) {
                 continue;
