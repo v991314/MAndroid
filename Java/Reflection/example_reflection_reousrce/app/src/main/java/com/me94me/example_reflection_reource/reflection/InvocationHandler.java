@@ -1,13 +1,10 @@
 package com.me94me.example_reflection_reource.reflection;
 
 /**
- * {@code InvocationHandler} is the interface implemented by
- * the <i>invocation handler</i> of a proxy instance.
+ * {@code InvocationHandler}是由InvocationHandler的代理对象实现的接口。
  *
- * <p>Each proxy instance has an associated invocation handler.
- * When a method is invoked on a proxy instance, the method
- * invocation is encoded and dispatched to the {@code invoke}
- * method of its invocation handler.
+ * 每个代理对象都有一个关联的InvocationHandler。
+ * 当在代理对象上调用方法时，方法调用将被编码并调度到其InvocationHandler的{@code invoke}方法。
  *
  * @author      Peter Jones
  * @see         Proxy
@@ -21,7 +18,7 @@ public interface InvocationHandler {
      * when a method is invoked on a proxy instance that it is
      * associated with.
      *
-     * @param   proxy the proxy instance that the method was invoked on
+     * @param   proxy 调用的代理对象
      *
      * @param   method the {@code Method} instance corresponding to
      * the interface method invoked on the proxy instance.  The declaring
@@ -65,6 +62,5 @@ public interface InvocationHandler {
      *
      * @see     UndeclaredThrowableException
      */
-    public Object invoke(Object proxy, Method method, Object[] args)
-        throws Throwable;
+    public Object invoke(Object proxy, Method method, Object[] args)throws Throwable;
 }

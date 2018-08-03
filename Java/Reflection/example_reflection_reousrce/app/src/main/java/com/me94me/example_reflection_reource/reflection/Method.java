@@ -87,6 +87,7 @@ public final class Method extends Executable  {
     }
 
     /**
+     * 获取该方法声明的类
      * {@inheritDoc}
      */
     @Override
@@ -343,41 +344,23 @@ public final class Method extends Executable  {
     }
 
     /**
-     * Invokes the underlying method represented by this {@code Method}
-     * object, on the specified object with the specified parameters.
-     * Individual parameters are automatically unwrapped to match
-     * primitive formal parameters, and both primitive and reference
-     * parameters are subject to method invocation conversions as
-     * necessary.
+     * 在具有指定参数的指定对象上调用此{@code Method}对象表示的基础方法。
+     * 单独的参数自动解包以匹配原始形式参数，并且原始参数和引用参数都根据需要进行方法调用转换。
      *
-     * <p>If the underlying method is static, then the specified {@code obj}
-     * argument is ignored. It may be null.
+     * 如果底层方法是静态的，则忽略指定的{@code obj}参数。 它可能为空。
      *
-     * <p>If the number of formal parameters required by the underlying method is
-     * 0, the supplied {@code args} array may be of length 0 or null.
+     * 如果基础方法所需的形式参数的数量为0，则提供的{@code args}数组的长度可以为0或null。
      *
-     * <p>If the underlying method is an instance method, it is invoked
-     * using dynamic method lookup as documented in The Java Language
-     * Specification, Second Edition, section 15.12.4.4; in particular,
-     * overriding based on the runtime type of the target object will occur.
+     * 如果底层方法是静态的，则声明该方法的类如果尚未初始化则初始化。
      *
-     * <p>If the underlying method is static, the class that declared
-     * the method is initialized if it has not already been initialized.
+     * 如果方法正常完成，则返回的值返回给invoke的调用者;
+     * 如果值具有基本类型，则首先将其适当地包装在对象中。
+     * 但是，如果值具有基本类型数组的类型，则数组的元素不包装在对象中;
+     * 换句话说，返回一个原始类型的数组。 如果底层方法返回类型为void，则调用返回null。
      *
-     * <p>If the method completes normally, the value it returns is
-     * returned to the caller of invoke; if the value has a primitive
-     * type, it is first appropriately wrapped in an object. However,
-     * if the value has the type of an array of a primitive type, the
-     * elements of the array are <i>not</i> wrapped in objects; in
-     * other words, an array of primitive type is returned.  If the
-     * underlying method return type is void, the invocation returns
-     * null.
-     *
-     * @param obj  the object the underlying method is invoked from
-     * @param args the arguments used for the method call
-     * @return the result of dispatching the method represented by
-     * this object on {@code obj} with parameters
-     * {@code args}
+     * @param obj  调用该方法的对象
+     * @param args method调用所需要的参数
+     * @return 调用该方法的返回值
      *
      * @exception IllegalAccessException    if this {@code Method} object
      *              is enforcing Java language access control and the underlying

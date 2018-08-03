@@ -540,7 +540,7 @@ public abstract class Executable extends AccessibleObject implements Member, Gen
     private long artMethod;
 
     /** Executable's declaring class */
-    @SuppressWarnings("unused") // set by runtime
+    @SuppressWarnings("unused") // 运行时设置
     private Class<?> declaringClass;
 
     /**

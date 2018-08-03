@@ -749,10 +749,8 @@ public final class Class<T> implements java.io.Serializable,
     private native String getNameNative();
 
     /**
-     * Returns the class loader for the class.  Some implementations may use
-     * null to represent the bootstrap class loader. This method will return
-     * null in such implementations if this class was loaded by the bootstrap
-     * class loader.
+     * 返回类的类加载器
+     * 某些实现可能使用null来表示引导类加载器。 如果此类由引导类加载器加载，则此方法将在此类实现中返回null。
      *
      * <p> If a security manager is present, and the caller's class loader is
      * not null and the caller's class loader is not the same as or an ancestor of
@@ -761,8 +759,7 @@ public final class Class<T> implements java.io.Serializable,
      * method with a {@code RuntimePermission("getClassLoader")}
      * permission to ensure it's ok to access the class loader for the class.
      *
-     * <p>If this object
-     * represents a primitive type or void, null is returned.
+     * 如果此对象表示基本类型或void，则返回null
      *
      * @return  the class loader that loaded the class or interface
      *          represented by this object.

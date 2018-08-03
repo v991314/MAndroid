@@ -37,8 +37,9 @@ import static java.util.Collections.unmodifiableList;
 
 /**
  * Retrofit 2.4.0
- *
+ * <p>
  * 敬
+ *
  * @author Bob Lee (bob@squareup.com)
  * @author Jake Wharton (jw@squareup.com)
  */
@@ -137,6 +138,7 @@ public final class Retrofit {
                     private final Platform platform = Platform.get();
 
                     //接口方法的调用也即通过调用InvocationHandler对象的invoke（）来完成指定的功能
+
                     /**
                      * 所有接口方法的调用都会集中到这里进行处理
                      * @param proxy 接口对象
@@ -146,6 +148,7 @@ public final class Retrofit {
                     @Override
                     public Object invoke(Object proxy, Method method, @Nullable Object[] args)
                             throws Throwable {
+                        //如果获取声明的类等于代理类
                         if (method.getDeclaringClass() == Object.class) {
                             return method.invoke(this, args);
                         }
@@ -174,6 +177,7 @@ public final class Retrofit {
             }
         }
     }
+
     /**
      * 获取ServiceMethod
      */
@@ -271,6 +275,7 @@ public final class Retrofit {
     public <T> Converter<ResponseBody, T> responseBodyConverter(Type type, Annotation[] annotations) {
         return nextResponseBodyConverter(null, type, annotations);
     }
+
     public <T> Converter<ResponseBody, T> nextResponseBodyConverter(
             @Nullable Converter.Factory skipPast, Type type, Annotation[] annotations) {
         checkNotNull(type, "type == null");
