@@ -1,47 +1,17 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
-
 package com.me94me.example_reflection_reource.reflection;
 
-import dalvik.annotation.optimization.FastNative;
-import libcore.util.EmptyArray;
+
 
 import java.lang.annotation.Annotation;
 import java.util.Comparator;
 
 /**
- * {@code Constructor} provides information about, and access to, a single
- * constructor for a class.
+ * {@code Constructor}提供有关类的单个构造函数的信息和访问权限。
  *
- * <p>{@code Constructor} permits widening conversions to occur when matching the
- * actual parameters to newInstance() with the underlying
- * constructor's formal parameters, but throws an
- * {@code IllegalArgumentException} if a narrowing conversion would occur.
+ * {@code Constructor}允许在将实际参数与newInstance（）与底层构造函数的形式参数匹配时进行扩展转换
+ * 但如果发生缩小转换则抛出{@code IllegalArgumentException}。
  *
- * @param <T> the class in which the constructor is declared
+ * @param <T> 声明构造函数的类
  *
  * @see Member
  * @see java.lang.Class
@@ -53,6 +23,7 @@ import java.util.Comparator;
  * @author      Nakul Saraiya
  */
 public final class Constructor<T> extends Executable {
+
     private static final Comparator<Method> ORDER_BY_SIGNATURE = null; // Unused; must match Method.
 
     private final Class<?> serializationClass;

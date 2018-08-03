@@ -33,14 +33,10 @@ import libcore.reflect.Types;
 import libcore.util.EmptyArray;
 
 /**
- * A {@code Method} provides information about, and access to, a single method
- * on a class or interface.  The reflected method may be a class method
- * or an instance method (including an abstract method).
+ * {@code Method}提供有关类或接口上单个方法的信息和访问权限。
+ * 反射的方法可以是类方法或实例方法（包括抽象方法）。
  *
- * <p>A {@code Method} permits widening conversions to occur when matching the
- * actual parameters to invoke with the underlying method's formal
- * parameters, but it throws an {@code IllegalArgumentException} if a
- * narrowing conversion would occur.
+ * {@code 方法}允许在将实际参数与基础方法的形式参数进行匹配时进行扩展转换，但如果发生缩小转换，则会抛出{@code IllegalArgumentException}。
  *
  * @see Member
  * @see java.lang.Class

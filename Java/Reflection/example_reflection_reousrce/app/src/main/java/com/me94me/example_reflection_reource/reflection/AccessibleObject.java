@@ -1,49 +1,19 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
 
 package com.me94me.example_reflection_reource.reflection;
 
 import java.lang.annotation.Annotation;
 
 /**
- * The AccessibleObject class is the base class for Field, Method and
- * Constructor objects.  It provides the ability to flag a reflected
- * object as suppressing default Java language access control checks
- * when it is used.  The access checks--for public, default (package)
- * access, protected, and private members--are performed when Fields,
- * Methods or Constructors are used to set or get fields, to invoke
- * methods, or to create and initialize new instances of classes,
- * respectively.
+ * AccessibleObject类是Field，Method和Constructor对象的基类
+ * 它提供了将反射对象标记为在使用时禁止默认Java语言访问控制检查的功能。
  *
- * <p>Setting the {@code accessible} flag in a reflected object
- * permits sophisticated applications with sufficient privilege, such
- * as Java Object Serialization or other persistence mechanisms, to
- * manipulate objects in a manner that would normally be prohibited.
+ * 当使用Fields，Methods或Constructors设置或获取字段，调用方法或创建和初始化类的新实例时
+ * 将执行访问检查 - 对于公共，默认（包）访问，受保护和私有成员。
  *
- * <p>By default, a reflected object is <em>not</em> accessible.
+ * 在反射对象中设置{@code accessible}标志允许具有足够权限的复杂应用程序
+ * （例如Java对象序列化或其他持久性机制）以通常被禁止的方式操作对象。
+ *
+ * 默认情况下，反射对象不可访问。
  *
  * @see Field
  * @see Method
@@ -55,29 +25,9 @@ import java.lang.annotation.Annotation;
 public class AccessibleObject implements AnnotatedElement {
 
     /**
-     * Convenience method to set the {@code accessible} flag for an
-     * array of objects with a single security check (for efficiency).
+     * 通过单个安全检查为效率设置对象数组的{@code accessible}标志的便捷方法（为了提高效率）。
      *
-     * <p>First, if there is a security manager, its
-     * {@code checkPermission} method is called with a
-     * {@code ReflectPermission("suppressAccessChecks")} permission.
-     *
-     * <p>A {@code SecurityException} is raised if {@code flag} is
-     * {@code true} but accessibility of any of the elements of the input
-     * {@code array} may not be changed (for example, if the element
-     * object is a {@link Constructor} object for the class {@link
-     * java.lang.Class}).  In the event of such a SecurityException, the
-     * accessibility of objects is set to {@code flag} for array elements
-     * upto (and excluding) the element for which the exception occurred; the
-     * accessibility of elements beyond (and including) the element for which
-     * the exception occurred is unchanged.
-     *
-     * @param array the array of AccessibleObjects
-     * @param flag  the new value for the {@code accessible} flag
-     *              in each object
-     * @throws SecurityException if the request is denied.
-     * @see SecurityManager#checkPermission
-     * @see java.lang.RuntimePermission
+     * <p>首先，如果有安全管理器，则使用{@code ReflectPermission（“suppressAccessChecks”）}权限调用其{@code checkPermission}方法。
      */
     public static void setAccessible(AccessibleObject[] array, boolean flag)
         throws SecurityException {
@@ -87,26 +37,10 @@ public class AccessibleObject implements AnnotatedElement {
     }
 
     /**
-     * Set the {@code accessible} flag for this object to
-     * the indicated boolean value.  A value of {@code true} indicates that
-     * the reflected object should suppress Java language access
-     * checking when it is used.  A value of {@code false} indicates
-     * that the reflected object should enforce Java language access checks.
+     * 将此对象的{@code accessible}标志设置为指示的布尔值。
+     * 值{@code true}表示反射对象在使用时应禁止Java语言访问检查。
+     * 值{@code false}表示反射对象应强制执行Java语言访问检查。
      *
-     * <p>First, if there is a security manager, its
-     * {@code checkPermission} method is called with a
-     * {@code ReflectPermission("suppressAccessChecks")} permission.
-     *
-     * <p>A {@code SecurityException} is raised if {@code flag} is
-     * {@code true} but accessibility of this object may not be changed
-     * (for example, if this element object is a {@link Constructor} object for
-     * the class {@link java.lang.Class}).
-     *
-     * <p>A {@code SecurityException} is raised if this object is a {@link
-     * java.lang.reflect.Constructor} object for the class
-     * {@code java.lang.Class}, and {@code flag} is true.
-     *
-     * @param flag the new value for the {@code accessible} flag
      * @throws SecurityException if the request is denied.
      * @see SecurityManager#checkPermission
      * @see java.lang.RuntimePermission
@@ -138,6 +72,7 @@ public class AccessibleObject implements AnnotatedElement {
         obj.override = flag;
     }
 
+
     /**
      * Get the value of the {@code accessible} flag for this object.
      *
@@ -148,7 +83,7 @@ public class AccessibleObject implements AnnotatedElement {
     }
 
     /**
-     * Constructor: only used by the Java Virtual Machine.
+     * Constructor: 仅被Java虚拟机只用
      */
     protected AccessibleObject() {}
 

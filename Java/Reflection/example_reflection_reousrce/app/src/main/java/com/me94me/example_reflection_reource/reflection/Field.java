@@ -1,47 +1,14 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
- *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
- *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
- */
-
 package com.me94me.example_reflection_reource.reflection;
-
-import dalvik.annotation.optimization.FastNative;
 
 import java.lang.annotation.Annotation;
 import java.util.Objects;
-import libcore.reflect.AnnotatedElements;
-import libcore.reflect.GenericSignatureParser;
 
 
 /**
- * A {@code Field} provides information about, and dynamic access to, a
- * single field of a class or an interface.  The reflected field may
- * be a class (static) field or an instance field.
+ * {@code Field}提供有关类或接口的单个字段的信息和动态访问
+ * 反射字段可以是类（静态）字段或实例字段
  *
- * <p>A {@code Field} permits widening conversions to occur during a get or
- * set access operation, but throws an {@code IllegalArgumentException} if a
- * narrowing conversion would occur.
+ * <p>{@code Field}允许在get或set访问操作期间进行扩展转换，但如果发生缩小转换，则会抛出{@code IllegalArgumentException}。
  *
  * @see Member
  * @see java.lang.Class
@@ -53,8 +20,7 @@ import libcore.reflect.GenericSignatureParser;
  * @author Kenneth Russell
  * @author Nakul Saraiya
  */
-public final
-class Field extends AccessibleObject implements Member {
+public final class Field extends AccessibleObject implements Member {
 
     private int accessFlags;
     private java.lang.Class<?> declaringClass;
@@ -66,15 +32,14 @@ class Field extends AccessibleObject implements Member {
     }
 
     /**
-     * Returns the {@code Class} object representing the class or interface
-     * that declares the field represented by this {@code Field} object.
+     * 返回表示声明由此{@code Field}对象表示的字段的类或接口的{@code Class}对象。
      */
     public java.lang.Class<?> getDeclaringClass() {
         return declaringClass;
     }
 
     /**
-     * Returns the name of the field represented by this {@code Field} object.
+     * 返回此{@code Field}对象表示的字段的名称。
      */
     public String getName() {
         if (dexFieldIndex == -1) {
@@ -92,9 +57,8 @@ class Field extends AccessibleObject implements Member {
     private native String getNameInternal();
 
     /**
-     * Returns the Java language modifiers for the field represented
-     * by this {@code Field} object, as an integer. The {@code Modifier} class should
-     * be used to decode the modifiers.
+     * 以整数形式返回此{@code Field}对象表示的字段的Java语言修饰符
+     * {@code Modifier}类应该用于解码修饰符。
      *
      * @see Modifier
      */
@@ -103,11 +67,8 @@ class Field extends AccessibleObject implements Member {
     }
 
     /**
-     * Returns {@code true} if this field represents an element of
-     * an enumerated type; returns {@code false} otherwise.
+     * 如果此字段表示枚举类型的元素，则返回{@code true}; 否则返回{@code false}。
      *
-     * @return {@code true} if and only if this field represents an element of
-     * an enumerated type.
      * @since 1.5
      */
     public boolean isEnumConstant() {
@@ -115,11 +76,8 @@ class Field extends AccessibleObject implements Member {
     }
 
     /**
-     * Returns {@code true} if this field is a synthetic
-     * field; returns {@code false} otherwise.
+     * 如果此字段是合成字段，则返回{@code true}; 否则返回{@code false}。
      *
-     * @return true if and only if this field is a synthetic
-     * field as defined by the Java Language Specification.
      * @since 1.5
      */
     public boolean isSynthetic() {
@@ -127,27 +85,19 @@ class Field extends AccessibleObject implements Member {
     }
 
     /**
-     * Returns a {@code Class} object that identifies the
-     * declared type for the field represented by this
-     * {@code Field} object.
+     * 返回一个{@code Class}对象，该对象标识由此{@code Field}对象表示的字段的声明类型。
      *
-     * @return a {@code Class} object identifying the declared
-     * type of the field represented by this object
      */
     public java.lang.Class<?> getType() {
         return type;
     }
 
     /**
-     * Returns a {@code Type} object that represents the declared type for
-     * the field represented by this {@code Field} object.
+     * 返回{@code Type}对象，该对象表示此{@code Field}对象表示的字段的声明类型。
      *
-     * <p>If the {@code Type} is a parameterized type, the
-     * {@code Type} object returned must accurately reflect the
-     * actual type parameters used in the source code.
+     * 如果{@code Type}是参数化类型，则返回的{@code Type}对象必须准确反映源代码中使用的实际类型参数。
      *
-     * <p>If the type of the underlying field is a type variable or a
-     * parameterized type, it is created. Otherwise, it is resolved.
+     * 如果基础字段的类型是类型变量或参数化类型，则创建它。 否则，它就解决了。
      *
      * @return a {@code Type} object that represents the declared type for
      *     the field represented by this {@code Field} object

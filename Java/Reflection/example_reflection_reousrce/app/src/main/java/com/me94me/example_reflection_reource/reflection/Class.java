@@ -2405,10 +2405,7 @@ public final class Class<T> implements java.io.Serializable,
 
     // Android-changed: Made public/hidden instead of using sun.misc.SharedSecrets.
     /**
-     * Returns the elements of this enum class or null if this
-     * Class object does not represent an enum type;
-     * identical to getEnumConstants except that the result is
-     * uncloned, cached, and shared by all callers.
+     * 返回此枚举类的元素，如果此Class对象不表示枚举类型，则返回null;与getEnumConstants相同，但结果是由所有调用者取消克隆，缓存和共享。
      * @hide
      */
     public T[] getEnumConstantsShared() {
@@ -2417,21 +2414,13 @@ public final class Class<T> implements java.io.Serializable,
     }
 
     /**
-     * Casts an object to the class or interface represented
-     * by this {@code Class} object.
-     *
-     * @param obj the object to be cast
-     * @return the object after casting, or null if obj is null
-     *
-     * @throws ClassCastException if the object is not
-     * null and is not assignable to the type T.
+     * 将对象强制转换为此{@code Class}对象表示的类或接口。
      *
      * @since 1.5
      */
     @SuppressWarnings("unchecked")
     public T cast(Object obj) {
-        if (obj != null && !isInstance(obj))
-            throw new ClassCastException(cannotCastMsg(obj));
+        if (obj != null && !isInstance(obj)) throw new ClassCastException(cannotCastMsg(obj));
         return (T) obj;
     }
 

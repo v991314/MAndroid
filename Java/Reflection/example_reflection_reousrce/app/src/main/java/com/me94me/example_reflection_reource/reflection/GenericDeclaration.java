@@ -26,20 +26,16 @@
 package com.me94me.example_reflection_reource.reflection;
 
 /**
- * A common interface for all entities that declare type variables.
+ * 声明类型变量的所有实体的通用接口。
  *
  * @since 1.5
  */
 public interface GenericDeclaration extends AnnotatedElement {
     /**
-     * Returns an array of {@code TypeVariable} objects that
-     * represent the type variables declared by the generic
-     * declaration represented by this {@code GenericDeclaration}
-     * object, in declaration order.  Returns an array of length 0 if
-     * the underlying generic declaration declares no type variables.
+     * 返回{@code TypeVariable}对象的数组，这些对象表示由此{@code GenericDeclaration}对象表示的泛型声明声明的类型变量，按声明顺序
+     * 如果基础泛型声明未声明类型变量，则返回长度为0的数组
      *
-     * @return an array of {@code TypeVariable} objects that represent
-     *     the type variables declared by this generic declaration
+     * @return 一个{@code TypeVariable}对象数组，表示此泛型声明声明的类型变量
      * @throws GenericSignatureFormatError if the generic
      *     signature of this generic declaration does not conform to
      *     the format specified in
