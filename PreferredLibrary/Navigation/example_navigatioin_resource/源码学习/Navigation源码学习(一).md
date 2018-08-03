@@ -1,6 +1,8 @@
-# Navigation源码学习
+# Jetpack之Navigation源码学习（一）
 
 > 如果有人不相信代码是简单的，那是因为他们没有意识到人生有多复杂。 
+
+本篇按照使用流程进行梳理代码结构
 
 ## Navigation
 

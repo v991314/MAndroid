@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.me94me.example_navigatioin_resource.R;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -48,21 +46,26 @@ import androidx.fragment.app.Fragment;
  */
 public class NavHostFragment extends Fragment implements NavHost {
 
+    //******************** onSaveInstanceState()里保存的状态 ************************
     //保存了controller状态的bundle的key
+    //保存了一个bundle，保存了两个值：controller的graphId
+//                                    controller回退栈destinationId
     private static final String KEY_NAV_CONTROLLER_STATE = "android-support-nav:fragment:navControllerState";
 
     //保存该Fragment是不是HostFragment
     private static final String KEY_DEFAULT_NAV_HOST = "android-support-nav:fragment:defaultHost";
 
+
+
+    //******************** 临时保存在Fragment的arguments里的graph的bundle的键 *****************
     //将GraphId保存在arguments的key
     private static final String KEY_GRAPH_ID = "android-support-nav:fragment:graphId";
 
-
+    //全局变量
     //NavController
     private NavController mNavController;
     //判断是否是HostFragment
     private boolean mDefaultNavHost;
-
 
     /**
      * 找一个{@link NavController}给一个本地{@link Fragment}.
@@ -81,8 +84,7 @@ public class NavHostFragment extends Fragment implements NavHost {
             if (findFragment instanceof NavHostFragment) {
                 return ((NavHostFragment) findFragment).getNavController();
             }
-            Fragment primaryNavFragment = findFragment.getFragmentManager()
-                    .getPrimaryNavigationFragment();
+            Fragment primaryNavFragment = findFragment.getFragmentManager().getPrimaryNavigationFragment();
             if (primaryNavFragment instanceof NavHostFragment) {
                 return ((NavHostFragment) primaryNavFragment).getNavController();
             }
@@ -139,6 +141,7 @@ public class NavHostFragment extends Fragment implements NavHost {
      * @param graphResId graph的资源Id
      */
     public void setGraph(int graphResId) {
+        //mNavController为null保存在arguments里
         if (mNavController == null) {
             Bundle args = getArguments();
             if (args == null) {
@@ -201,6 +204,7 @@ public class NavHostFragment extends Fragment implements NavHost {
             if (graphId != 0) {
                 mNavController.setGraph(graphId);
             } else {
+                //设置manifest里的graph
                 mNavController.setMetadataGraph();
             }
         }
@@ -223,6 +227,7 @@ public class NavHostFragment extends Fragment implements NavHost {
         FrameLayout frameLayout = new FrameLayout(inflater.getContext());
         // 当通过XML添加时，这没有任何效果（因为此FrameLayout会自动获得ID），
         // 但是这确保了View在作为子fragment事务所需的编程方式添加NavHostFragment的情况下作为此Fragment的View层次结构的一部分存在
+        //Id设置为fragment的Id
         frameLayout.setId(getId());
         //NavHostFragment就是一个frameLayout,一个容器
         return frameLayout;

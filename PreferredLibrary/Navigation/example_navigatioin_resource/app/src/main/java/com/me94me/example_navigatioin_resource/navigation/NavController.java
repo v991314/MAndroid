@@ -607,7 +607,7 @@ public class NavController {
      *
      * @param directions directions that describe this navigation operation
      */
-    public void navigate(NavDirections directions,NavOptions navOptions) {
+    public void navigate(NavDirections directions, NavOptions navOptions) {
         navigate(directions.getActionId(), directions.getArguments(), navOptions);
     }
     /**
