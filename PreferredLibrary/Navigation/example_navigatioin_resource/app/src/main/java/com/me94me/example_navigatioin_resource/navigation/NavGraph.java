@@ -77,7 +77,9 @@ public class NavGraph extends NavDestination implements Iterable<NavDestination>
         return null;
     }
 
+
     /**
+     * 添加节点到NavGraph
      * Adds a destination to this NavGraph. The destination must have an
      * {@link NavDestination#getId()} id} set.
      *
