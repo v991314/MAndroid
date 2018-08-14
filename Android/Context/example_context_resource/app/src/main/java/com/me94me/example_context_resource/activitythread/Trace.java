@@ -158,7 +158,7 @@ public final class Trace {
     }
 
     /**
-     * Returns true if a trace tag is enabled.
+     * 若跟踪标志能用返回true
      *
      * @param traceTag The trace tag to check.
      * @return True if the trace tag is valid.

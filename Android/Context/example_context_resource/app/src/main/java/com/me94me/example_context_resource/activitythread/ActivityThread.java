@@ -2,11 +2,8 @@ package com.me94me.example_context_resource.activitythread;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Application;
 import android.app.Instrumentation;
-import android.app.Service;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -116,6 +113,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.webkit.WebView;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.RuntimeInit;
@@ -126,6 +125,10 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
+import com.me94me.example_context_resource.activitythread.EventLoggingReporter;
+import com.me94me.example_context_resource.context.Activity;
+import com.me94me.example_context_resource.context.Application;
+import com.me94me.example_context_resource.context.Service;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
@@ -148,8 +151,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
-import androidx.annotation.GuardedBy;
-import androidx.annotation.VisibleForTesting;
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -167,7 +168,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.view.Display.INVALID_DISPLAY;
-
 /** 远程连接异常 */
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -183,7 +183,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final String TAG = "ActivityThread";
     /** Bitmap配置 */
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
-
     static final boolean localLOGV = false;
     static final boolean DEBUG_MESSAGES = false;
     /** @hide */
@@ -205,7 +204,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     /** Type for IActivityManager.serviceDoneExecuting: done stopping (destroying) service */
     public static final int SERVICE_DONE_EXECUTING_STOP = 2;
 
-
     /** 配置变化了之后是否调用activity的回调 */
     private static final boolean REPORT_TO_ACTIVITY = true;
 
@@ -214,7 +212,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /** 进程启动时关联的标识符(会被作为进程启动时的一个参数) */
     public static final String PROC_START_SEQ_IDENT = "seq=";
-
     /** NetWork锁 */
     private final Object mNetworkPolicyLock = new Object();
 
@@ -232,19 +229,14 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     static volatile IPackageManager sPackageManager;
 
-    /** ActivityThread与ActivityManagerService通信的桥梁 */
+    /** ActivityThread与ActivityManagerService通信的桥梁(Binder对象) */
     final ApplicationThread mAppThread = new ApplicationThread();
-
     final Looper mLooper = Looper.myLooper();
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
 
-    //存储了所有的Activity,以IBinder作为key,IBinder是Activity在框架层的唯一表示
+    /** 存储了所有的Activity,以IBinder作为key,IBinder是Activity在框架层的唯一表示 */
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
-
-    //存储了所有的Service
-    final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
-
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
     ActivityClientRecord mNewActivities = null;
@@ -253,8 +245,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
 
-
-
+    /** 存储了所有的Service */
+    final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
     AppBindData mBoundApplication;
     Profiler mProfiler;
     int mCurDefaultDisplayDpi;
@@ -262,7 +254,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
     Application mInitialApplication;
-    final ArrayList<Application> mAllApplications = new ArrayList<Application>();
+    final ArrayList<Application> mAllApplications
+            = new ArrayList<Application>();
     // set of instantiated backup agents, keyed by package name
     final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
     /** Reference to singleton {@link ActivityThread} */
@@ -280,7 +273,6 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /** 一些activity变化了(用于监听activity启动后内存超过3/4释放已有的activity) */
     boolean mSomeActivitiesChanged = false;
-
     boolean mUpdatingSystemConfig = false;
     /* package */ boolean mHiddenApiWarningShown = false;
 
@@ -357,7 +349,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     Bundle mCoreSettings = null;
 
-    /** Activity客户端记录，用于实际{@link Activity}实例的簿记。 */
+    /** Activity客户端记录，用于实际{@link android.app.Activity}实例的簿记。 */
     public static final class ActivityClientRecord {
         //唯一表示
         public IBinder token;
@@ -370,7 +362,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         //这里存储了真正的Activity对象
         Activity activity;
         Window window;
-
         Activity parent;
         String embeddedID;
         Activity.NonConfigurationInstances lastNonConfigurationInstances;
@@ -750,13 +741,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         int flags;
     }
 
-    /** ActivityThread与ActivityManagerService通信的桥梁
-     * 它不是一个线程，而是一个Binder对象
-     * ApplicationThread经过包装之后变成代理对象ApplicationThreadProxy
-     *
-     * AMS调用ActivityThread是通过ApplicationThreadProxy对象，
-     * 而ActivityThread调用AMS的方法却是ActivityManagerProxy
-     */
     private class ApplicationThread extends IApplicationThread.Stub {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
@@ -764,10 +748,10 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         private void updatePendingConfiguration(Configuration config) {
             synchronized (mResourcesManager) {
-                if (mPendingConfiguration == null || mPendingConfiguration.isOtherSeqNewer(config)) {
+                if (mPendingConfiguration == null ||
+                        mPendingConfiguration.isOtherSeqNewer(config)) {
                     mPendingConfiguration = config;
                 }
-            }
             }
         }
 
@@ -4925,10 +4909,10 @@ public final class ActivityThread extends ClientTransactionHandler {
      * @param newConfig The new configuration.
      */
     private void performConfigurationChanged(ComponentCallbacks2 cb, Configuration newConfig) {
-        //配置变化是否进行回调
         if (!REPORT_TO_ACTIVITY) {
             return;
         }
+
         // ContextThemeWrappers may override the configuration for that context. We must check and
         // apply any overrides defined.
         Configuration contextThemeWrapperOverrideConfig = null;
@@ -6479,12 +6463,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     /**
-     * 将新建的ActivityThread附加参数
+     * ActivityThreadAttach
      * @param system
      * @param startSeq
      */
     private void attach(boolean system, long startSeq) {
-        //当前ActivityThraed
+        //当前ActivityThread
         sCurrentActivityThread = this;
         //是否是系统线程,默认false
         mSystemThread = system;
@@ -6497,20 +6481,16 @@ public final class ActivityThread extends ClientTransactionHandler {
                     ensureJitEnabled();
                 }
             });
-
-            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>", UserHandle.myUserId());
-
+            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
+                                                    UserHandle.myUserId());
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
-
             final IActivityManager mgr = ActivityManager.getService();
-
             try {
                 mgr.attachApplication(mAppThread, startSeq);
-
-            } catch (RemoteException ex) {//抛出远程异常
+            } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
-            // 监听堆限制(并释放已有的Activity)
+            //监听堆限制(并释放已有的Activity)
             BinderInternal.addGcWatcher(new Runnable() {
                 @Override public void run() {
                     //启动一个activity就会设为true
@@ -6532,7 +6512,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                         try {
                             //这时候释放一些Activity
                             mgr.releaseSomeActivities(mAppThread);
-                        } catch (RemoteException e) {//远程异常
+                        } catch (RemoteException e) {
                             throw e.rethrowFromSystemServer();
                         }
                     }
@@ -6661,7 +6641,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         Environment.initForCurrentUser();
 
         // 设置libcore中事件日志记录的报告者
-        EventLogger.setReporter(new EventLoggingReporter());
+        EventLogger.setReporter(new com.me94me.example_context_resource.activitythread.EventLoggingReporter());
 
         // 确保TrustedCertificateStore在适当的位置查找CA证书
         //设置默认的用户目录
@@ -6699,7 +6679,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // ActivityThreadMain事件结束(对应Trance.tranceBegin())
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        com.me94me.example_context_resource.activitythread.Trace.traceEnd(com.me94me.example_context_resource.activitythread.Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         //Looper.prepareMainLooper();
         //Loop循环

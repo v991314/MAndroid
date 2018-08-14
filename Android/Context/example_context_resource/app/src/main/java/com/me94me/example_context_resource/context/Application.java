@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
 
+import com.me94me.example_context_resource.activitythread.ActivityThread;
+
 import java.util.ArrayList;
 
 import androidx.annotation.CallSuper;
