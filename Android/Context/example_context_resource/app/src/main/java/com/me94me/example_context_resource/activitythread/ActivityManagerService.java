@@ -4057,6 +4057,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
+
         long startTime = SystemClock.elapsedRealtime();
         ProcessRecord app;
         if (!isolated) {

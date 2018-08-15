@@ -1,4 +1,5 @@
 package com.me94me.example_context_resource.activitythread;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.IBinder;
 
