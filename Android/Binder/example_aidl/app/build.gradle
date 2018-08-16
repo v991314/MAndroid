@@ -6,8 +6,9 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+    buildToolsVersion "28.0.2"
     defaultConfig {
-        applicationId "com.me94me.example_context_resource"
+        applicationId "com.example.example_aidl"
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
@@ -20,8 +21,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility = '1.8'
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java', 'src/main/aidl']
+        }
     }
 }
 

@@ -1,4 +1,205 @@
-package com.me94me.example_context_resource.activitythread;
+package com.example.example_binder_resource;
+
+import static android.Manifest.permission.BIND_VOICE_INTERACTION;
+import static android.Manifest.permission.CHANGE_CONFIGURATION;
+import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
+import static android.Manifest.permission.REMOVE_TASKS;
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STOP_APP_SWITCHES;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
+import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
+import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
+import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+import static android.content.pm.PackageManager.GET_PROVIDERS;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
+import static android.os.Build.VERSION_CODES.N;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static android.os.IServiceManager.DUMP_FLAG_PROTO;
+import static android.os.Process.BLUETOOTH_UID;
+import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.Process.FIRST_ISOLATED_UID;
+import static android.os.Process.LAST_ISOLATED_UID;
+import static android.os.Process.NFC_UID;
+import static android.os.Process.PHONE_UID;
+import static android.os.Process.PROC_CHAR;
+import static android.os.Process.PROC_OUT_LONG;
+import static android.os.Process.PROC_PARENS;
+import static android.os.Process.PROC_SPACE_TERM;
+import static android.os.Process.ProcessStartResult;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SCHED_FIFO;
+import static android.os.Process.SCHED_OTHER;
+import static android.os.Process.SCHED_RESET_ON_FORK;
+import static android.os.Process.SE_UID;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SIGNAL_QUIT;
+import static android.os.Process.SIGNAL_USR1;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.THREAD_GROUP_BG_NONINTERACTIVE;
+import static android.os.Process.THREAD_GROUP_DEFAULT;
+import static android.os.Process.THREAD_GROUP_RESTRICTED;
+import static android.os.Process.THREAD_GROUP_TOP_APP;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
+import static android.os.Process.getFreeMemory;
+import static android.os.Process.getTotalMemory;
+import static android.os.Process.isThreadInProcess;
+import static android.os.Process.killProcess;
+import static android.os.Process.killProcessQuiet;
+import static android.os.Process.myPid;
+import static android.os.Process.myUid;
+import static android.os.Process.readProcFile;
+import static android.os.Process.removeAllProcessGroups;
+import static android.os.Process.sendSignal;
+import static android.os.Process.setProcessGroup;
+import static android.os.Process.setThreadPriority;
+import static android.os.Process.setThreadScheduler;
+import static android.os.Process.startWebView;
+import static android.os.Process.zygoteProcess;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
+import static android.provider.Settings.Global.DEBUG_APP;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
+import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
+import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
+import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
+import static android.provider.Settings.System.FONT_SCALE;
+import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
+import static com.android.internal.util.XmlUtils.readBooleanAttribute;
+import static com.android.internal.util.XmlUtils.readIntAttribute;
+import static com.android.internal.util.XmlUtils.readLongAttribute;
+import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
+import static com.android.internal.util.XmlUtils.writeIntAttribute;
+import static com.android.internal.util.XmlUtils.writeLongAttribute;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ_REASON;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBSERVERS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_URI_PERMISSION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IMMERSIVE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_NETWORK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_OOM_ADJ;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_POWER;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESSES;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESS_OBSERVERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROVIDER;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMISSION;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
+import static com.example.example_binder_resource.IBinder.SYSPROPS_TRANSACTION;
+import static com.example.example_binder_resource.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static com.example.example_binder_resource.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
+import static com.example.example_binder_resource.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static com.example.example_binder_resource.IServiceManager.DUMP_FLAG_PROTO;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -15,6 +216,7 @@ import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerProto;
 import android.app.ActivityOptions;
+import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -199,12 +401,13 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.BinderInternal;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
-import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.telephony.TelephonyIntents;
@@ -231,17 +434,17 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.am.ActivityManagerServiceProto;
 import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
 import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.ActivityManagerServiceDumpServicesProto;
-import com.android.server.am.ActivityManagerServiceProto;
-import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.GrantUriProto;
 import com.android.server.am.ImportanceTokenProto;
 import com.android.server.am.MemInfoDumpProto;
-import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.am.NeededUriGrantsProto;
 import com.android.server.am.ProcessOomProto;
 import com.android.server.am.ProcessToGcProto;
@@ -255,6 +458,12 @@ import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
+
+import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -294,212 +503,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import dalvik.system.VMRuntime;
-import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
-
-import static android.Manifest.permission.BIND_VOICE_INTERACTION;
-import static android.Manifest.permission.CHANGE_CONFIGURATION;
-import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
-import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
-import static android.Manifest.permission.INTERACT_ACROSS_USERS;
-import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
-import static android.Manifest.permission.READ_FRAME_BUFFER;
-import static android.Manifest.permission.REMOVE_TASKS;
-import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
-import static android.Manifest.permission.STOP_APP_SWITCHES;
-import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_CONTENT;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_DATA;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
-import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
-import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
-import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
-import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
-import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
-import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-import static android.content.pm.PackageManager.GET_PROVIDERS;
-import static android.content.pm.PackageManager.MATCH_ANY_USER;
-import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
-import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
-import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
-import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
-import static android.os.Build.VERSION_CODES.N;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
-import static android.os.IServiceManager.DUMP_FLAG_PROTO;
-import static android.os.Process.BLUETOOTH_UID;
-import static android.os.Process.FIRST_APPLICATION_UID;
-import static android.os.Process.FIRST_ISOLATED_UID;
-import static android.os.Process.LAST_ISOLATED_UID;
-import static android.os.Process.NFC_UID;
-import static android.os.Process.PHONE_UID;
-import static android.os.Process.PROC_CHAR;
-import static android.os.Process.PROC_OUT_LONG;
-import static android.os.Process.PROC_PARENS;
-import static android.os.Process.PROC_SPACE_TERM;
-import static android.os.Process.ProcessStartResult;
-import static android.os.Process.ROOT_UID;
-import static android.os.Process.SCHED_FIFO;
-import static android.os.Process.SCHED_OTHER;
-import static android.os.Process.SCHED_RESET_ON_FORK;
-import static android.os.Process.SE_UID;
-import static android.os.Process.SHELL_UID;
-import static android.os.Process.SIGNAL_QUIT;
-import static android.os.Process.SIGNAL_USR1;
-import static android.os.Process.SYSTEM_UID;
-import static android.os.Process.THREAD_GROUP_BG_NONINTERACTIVE;
-import static android.os.Process.THREAD_GROUP_DEFAULT;
-import static android.os.Process.THREAD_GROUP_RESTRICTED;
-import static android.os.Process.THREAD_GROUP_TOP_APP;
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
-import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
-import static android.os.Process.getFreeMemory;
-import static android.os.Process.getTotalMemory;
-import static android.os.Process.isThreadInProcess;
-import static android.os.Process.killProcess;
-import static android.os.Process.killProcessQuiet;
-import static android.os.Process.myPid;
-import static android.os.Process.myUid;
-import static android.os.Process.readProcFile;
-import static android.os.Process.removeAllProcessGroups;
-import static android.os.Process.sendSignal;
-import static android.os.Process.setProcessGroup;
-import static android.os.Process.setThreadPriority;
-import static android.os.Process.setThreadScheduler;
-import static android.os.Process.startWebView;
-import static android.os.Process.zygoteProcess;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
-import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
-import static android.provider.Settings.Global.DEBUG_APP;
-import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
-import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
-import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
-import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
-import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
-import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
-import static android.provider.Settings.System.FONT_SCALE;
-import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
-import static android.text.format.DateUtils.DAY_IN_MILLIS;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
-import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ_REASON;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_URI_PERMISSION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_NETWORK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_OOM_ADJ;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_POWER;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESSES;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESS_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROVIDER;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMISSION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
-import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
-import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
-import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
-import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
-
-/**
- * AMS 由 system_server 的server_thread线程创建
- */
 public class ActivityManagerService extends IActivityManager.Stub
-        implements Watchdog.Monitor,
-        BatteryStatsImpl.BatteryCallback {
+        implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
 
     /**
      * Priority we boost main thread and RT of top app to.
@@ -2701,23 +2706,29 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     };
 
+    /**
+     * 向serviceManager中注册ActivityManagerService
+     */
     public void setSystemProcess() {
         try {
+
+            /** 向serviceManager中注册ActivityManagerService */
+            /**
+             * 最终传递到Binder驱动的JavaBBinder对象
+             * Java层所有Binder对应的都是不同的JavaBBinder对象
+             */
             ServiceManager.addService(Context.ACTIVITY_SERVICE, this, /* allowIsolated= */ true,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
+
             ServiceManager.addService(ProcessStats.SERVICE_NAME, mProcessStats);
-            /** 用于打印内存信息*/
-            ServiceManager.addService("meminfo", new MemBinder(this), /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_HIGH);
-            /**
-             * 4.0新增服务用于输出应用进程使用硬件显示加速方面的信息
-             */
+            ServiceManager.addService("meminfo", new MemBinder(this), /* allowIsolated= */ false,
+                    DUMP_FLAG_PRIORITY_HIGH);
             ServiceManager.addService("gfxinfo", new GraphicsBinder(this));
             ServiceManager.addService("dbinfo", new DbBinder(this));
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(this),
                         /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
             }
-            /** 注册权限管理服务 */
             ServiceManager.addService("permission", new PermissionController(this));
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
 
@@ -2820,17 +2831,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * 客户端BbBinder
-     */
     static class DbBinder extends Binder {
         ActivityManagerService mActivityManagerService;
         DbBinder(ActivityManagerService activityManagerService) {
             mActivityManagerService = activityManagerService;
         }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext, "dbinfo", pw)) return;
+            if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
+                    "dbinfo", pw)) return;
             mActivityManagerService.dumpDbInfo(fd, pw, args);
         }
     }
@@ -2862,7 +2872,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             PriorityDump.dump(mPriorityDumper, fd, pw, args);
         }
     }
-
 
     public static final class Lifecycle extends SystemService {
         private final ActivityManagerService mService;
@@ -3032,11 +3041,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHiddenApiBlacklist = null;
     }
 
-    /**
-     * 该方法在主线程中调用
-     * 但可能需要附加各种handlers到其他线程，注意显式的looper
-     * @param systemContext
-     */
     // Note: This method is invoked on the main thread but may need to attach various
     // handlers to other threads.  So take care to be explicit about the looper.
     public ActivityManagerService(Context systemContext) {
@@ -3272,6 +3276,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i=0; i<N; i++) {
                 Parcel data2 = Parcel.obtain();
                 try {
+
                     procs.get(i).transact(IBinder.SYSPROPS_TRANSACTION, data2, null,
                             Binder.FLAG_ONEWAY);
                 } catch (RemoteException e) {
@@ -4067,7 +4072,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean knownToBeDead, int intentFlags, String hostingType, ComponentName hostingName,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
-
         long startTime = SystemClock.elapsedRealtime();
         ProcessRecord app;
         if (!isolated) {

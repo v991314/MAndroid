@@ -1,8 +1,4 @@
 package com.me94me.example_context_resource.activitythread;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -128,6 +124,7 @@ import com.android.server.am.MemInfoDumpProto;
 import com.me94me.example_context_resource.activitythread.EventLoggingReporter;
 import com.me94me.example_context_resource.context.Activity;
 import com.me94me.example_context_resource.context.Application;
+import com.me94me.example_context_resource.context.ContextImpl;
 import com.me94me.example_context_resource.context.Service;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
@@ -254,8 +251,10 @@ public final class ActivityThread extends ClientTransactionHandler {
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
     Application mInitialApplication;
-    final ArrayList<Application> mAllApplications
-            = new ArrayList<Application>();
+
+    /** 一个进程包含多个application，保存的application */
+    final ArrayList<Application> mAllApplications = new ArrayList<Application>();
+
     // set of instantiated backup agents, keyed by package name
     final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
     /** Reference to singleton {@link ActivityThread} */
@@ -2116,6 +2115,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mBoundApplication.processName;
     }
 
+    /**
+     * 获取system context
+     */
     public ContextImpl getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
@@ -6470,7 +6472,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void attach(boolean system, long startSeq) {
         //当前ActivityThread
         sCurrentActivityThread = this;
-        //是否是系统线程,默认false
+        //是否是系统线程
         mSystemThread = system;
         //正常App
         if (!system) {
@@ -6481,10 +6483,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                     ensureJitEnabled();
                 }
             });
-            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
-                                                    UserHandle.myUserId());
+            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>", UserHandle.myUserId());
+
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
+
             final IActivityManager mgr = ActivityManager.getService();
+
             try {
                 mgr.attachApplication(mAppThread, startSeq);
             } catch (RemoteException ex) {
@@ -6518,40 +6522,36 @@ public final class ActivityThread extends ClientTransactionHandler {
                     }
                 }
             });
-        } else {
-            // Don't set application object here -- if the system crashes,
-            // we can't display an alert, we just want to die die die.
-            android.ddm.DdmHandleAppName.setAppName("system_process",
-                    UserHandle.myUserId());
+
+        } else {//系统进程
+            // Don't set application object here -
+            // if the system crashes,we can't display an alert, we just want to die die die.
+            android.ddm.DdmHandleAppName.setAppName("system_process", UserHandle.myUserId());
             try {
                 mInstrumentation = new Instrumentation();
                 mInstrumentation.basicInit(this);
-                ContextImpl context = ContextImpl.createAppContext(
-                        this, getSystemContext().mPackageInfo);
+                ContextImpl context = ContextImpl.createAppContext(this, getSystemContext().mPackageInfo);
                 mInitialApplication = context.mPackageInfo.makeApplication(true, null);
                 mInitialApplication.onCreate();
             } catch (Exception e) {
-                throw new RuntimeException(
-                        "Unable to instantiate Application():" + e.toString(), e);
+                throw new RuntimeException("Unable to instantiate Application():" + e.toString(), e);
             }
         }
 
         // add dropbox logging to libcore
         DropBox.setReporter(new DropBoxReporter());
 
-        ViewRootImpl.ConfigChangedCallback configChangedCallback
-                = (Configuration globalConfig) -> {
+
+        /** 注册Configuration变化的回调通知*/
+        ViewRootImpl.ConfigChangedCallback configChangedCallback = (Configuration globalConfig) -> {
             synchronized (mResourcesManager) {
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
-                if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig,
-                        null /* compat */)) {
-                    updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
-                            mResourcesManager.getConfiguration().getLocales());
+                if (mResourcesManager.applyConfigurationToResourcesLocked(globalConfig, null /* compat */)) {
+                    updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(), mResourcesManager.getConfiguration().getLocales());
 
                     // This actually changed the resources! Tell everyone about it.
-                    if (mPendingConfiguration == null
-                            || mPendingConfiguration.isOtherSeqNewer(globalConfig)) {
+                    if (mPendingConfiguration == null || mPendingConfiguration.isOtherSeqNewer(globalConfig)) {
                         mPendingConfiguration = globalConfig;
                         sendMessage(H.CONFIGURATION_CHANGED, globalConfig);
                     }
@@ -6559,8 +6559,13 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         };
         ViewRootImpl.addConfigCallback(configChangedCallback);
+
     }
 
+    /**
+     * 创建系统进程的主线程
+     * @return
+     */
     public static ActivityThread systemMain() {
         // The system process on low-memory devices do not get to use hardware
         // accelerated drawing, since this can add too much overhead to the
@@ -6666,7 +6671,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
         }
-        //新建主线程
+        //新建应用进程的主线程
         ActivityThread thread = new ActivityThread();
         thread.attach(false, startSeq);
 
@@ -6679,7 +6684,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // ActivityThreadMain事件结束(对应Trance.tranceBegin())
-        com.me94me.example_context_resource.activitythread.Trace.traceEnd(com.me94me.example_context_resource.activitythread.Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        Trace.traceEnd(com.me94me.example_context_resource.activitythread.Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         //Looper.prepareMainLooper();
         //Loop循环
