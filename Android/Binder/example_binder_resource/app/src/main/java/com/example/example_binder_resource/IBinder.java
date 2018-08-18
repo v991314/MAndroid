@@ -92,6 +92,7 @@ public interface IBinder {
         public void binderDied();
     }
 
+
     /**
      * The first transaction code available for user commands.
      */
@@ -100,7 +101,8 @@ public interface IBinder {
      * The last transaction code available for user commands.
      */
     int LAST_CALL_TRANSACTION   = 0x00ffffff;
-    
+
+
     /**
      * IBinder protocol transaction code: pingBinder().
      */

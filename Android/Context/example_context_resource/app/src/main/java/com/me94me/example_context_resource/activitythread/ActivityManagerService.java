@@ -237,6 +237,7 @@ import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.ActivityManagerServiceDumpServicesProto;
 import com.android.server.am.ActivityManagerServiceProto;
+import com.android.server.am.ActivityRecord;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.GrantUriProto;
 import com.android.server.am.ImportanceTokenProto;
@@ -2895,6 +2896,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mService;
         }
     }
+
 
     /**
      * Encapsulates global settings related to hidden API enforcement behaviour, including tracking
@@ -27184,4 +27186,5 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     }
+
 }
