@@ -55,23 +55,24 @@ int                 mArgC;
 const char* const*  mArgV;
 int                 mArgLen;
 
+
 class PoolThread : public Thread
 {
-
 public:
     PoolThread(bool isMain)
         : mIsMain(isMain)
     {
     }
-    
 protected:
     virtual bool threadLoop()
     {
+        //线程函数如此简单，不过是在这个线程中又创建了一个IPCThreadState
         IPCThreadState::self()->joinThreadPool(mIsMain);
         return false;
     }
     const bool mIsMain;
 };
+
 
 //创建一个ProcessState
 //每个进程只有一个ProcessState对象
@@ -162,8 +163,10 @@ bool ProcessState::supportsProcesses() const
 void ProcessState::startThreadPool()
 {
     AutoMutex _l(mLock);
+    //如果线程池已经开启了，这个函数就没有意义了
     if (!mThreadPoolStarted) {
         mThreadPoolStarted = true;
+        //传入的是true
         spawnPooledThread(true);
     }
 }
@@ -325,6 +328,7 @@ void ProcessState::setArgV0(const char* txt)
     }
 }
 
+//isMain参数为true
 void ProcessState::spawnPooledThread(bool isMain)
 {
     if (mThreadPoolStarted) {
@@ -332,6 +336,7 @@ void ProcessState::spawnPooledThread(bool isMain)
         char buf[32];
         sprintf(buf, "Binder Thread #%d", s);
         LOGV("Spawning new pooled thread, name=%s\n", buf);
+        //PoolThread是在IPCThreadState中定义的一个Thread子类
         sp<Thread> t = new PoolThread(isMain);
         t->run(buf);
     }

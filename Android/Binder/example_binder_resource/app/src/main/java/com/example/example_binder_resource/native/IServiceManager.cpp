@@ -145,6 +145,7 @@ public:
             sleep(1);
         }
         return NULL;
+        return NULL;
     }
     
     virtual sp<IBinder> checkService( const String16& name) const

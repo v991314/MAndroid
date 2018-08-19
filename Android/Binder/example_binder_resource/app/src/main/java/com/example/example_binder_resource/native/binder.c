@@ -91,6 +91,9 @@ struct binder_state
     unsigned mapsize;
 };
 
+//这里的binder_open应该和我们之前在ProcessState中看到的一样
+//1、打开binder设备
+//2、内存映射
 struct binder_state *binder_open(unsigned mapsize)
 {
     struct binder_state *bs;
@@ -134,8 +137,10 @@ void binder_close(struct binder_state *bs)
     free(bs);
 }
 
+//成为系统中独一无二的manager
 int binder_become_context_manager(struct binder_state *bs)
 {
+    //自己的handle直接设置为0
     return ioctl(bs->fd, BINDER_SET_CONTEXT_MGR, 0);
 }
 
@@ -354,6 +359,10 @@ fail:
     return -1;
 }
 
+/**
+注意binder_handler参数，它是一个函数指针，binder_loop读取请求后将解析这些请求
+最后调用binder_handler完成最终的处理
+*/
 void binder_loop(struct binder_state *bs, binder_handler func)
 {
     int res;
@@ -367,7 +376,7 @@ void binder_loop(struct binder_state *bs, binder_handler func)
     readbuf[0] = BC_ENTER_LOOPER;
     binder_write(bs, readbuf, sizeof(unsigned));
 
-    for (;;) {
+    for (;;) {//循环
         bwr.read_size = sizeof(readbuf);
         bwr.read_consumed = 0;
         bwr.read_buffer = (unsigned) readbuf;
@@ -378,7 +387,7 @@ void binder_loop(struct binder_state *bs, binder_handler func)
             LOGE("binder_loop: ioctl failed (%s)\n", strerror(errno));
             break;
         }
-
+        //接收到请求，交给binder_parse，最终会调用func来处理这些请求
         res = binder_parse(bs, 0, readbuf, bwr.read_consumed, func);
         if (res == 0) {
             LOGE("binder_loop: unexpected reply?!\n");

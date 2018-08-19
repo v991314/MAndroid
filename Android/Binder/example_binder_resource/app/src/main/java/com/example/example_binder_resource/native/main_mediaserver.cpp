@@ -50,6 +50,8 @@ int main(int argc, char** argv)
     */
     sp<IServiceManager> sm = defaultServiceManager();
     LOGI("ServiceManager: %p", sm.get());
+
+    //一共注册了4个服务
     //初始化音频系统的AudioFlinger服务
     AudioFlinger::instantiate();
     //3、多媒体系统的MediaPlayer服务，我们将以它作为主切入点
@@ -58,6 +60,12 @@ int main(int argc, char** argv)
     CameraService::instantiate();
     //音频系统的AudioPolicy服务
     AudioPolicyService::instantiate();
+
+    //有两个线程为Service服务
+    //1、startThreadPool中新启动的线程通过joinThreadPool读取binder设备，查看是否有请求
+    //2、主线程也调用joinThreadPool读取binder设备，查看是否有请求。binder设备是支持多线程操作的。
+
+
     //4、根据名称像是要创建一个线程池
     ProcessState::self()->startThreadPool();
     //5、加入创建的线程池

@@ -30,6 +30,9 @@ sp<IMediaPlayerService> IMediaDeathNotifier::sMediaPlayerService;
 sp<IMediaDeathNotifier::DeathNotifier> IMediaDeathNotifier::sDeathNotifier;
 SortedVector< wp<IMediaDeathNotifier> > IMediaDeathNotifier::sObitRecipients;
 
+
+//这个函数通过与ServiceManager通信，获得一个能够与MediaPlayerService通信的BpBinder
+//然后通过interface_cast转换成一个BpMediaPlayerService
 // establish binder interface to MediaPlayerService
 /*static*/const sp<IMediaPlayerService>&
 IMediaDeathNotifier::getMediaPlayerService()
@@ -40,10 +43,12 @@ IMediaDeathNotifier::getMediaPlayerService()
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder;
         do {
+            //向ServiceManager查询对应服务的信息，返回BpBinder
             binder = sm->getService(String16("media.player"));
             if (binder != 0) {
                 break;
              }
+             //如果ServiceMananger上还没有注册对应的服务，则需要等待，直到对应服务器注册到ServiceManager为止
              LOGW("Media player service not published, waiting...");
              usleep(500000); // 0.5 s
         } while(true);
@@ -52,6 +57,7 @@ IMediaDeathNotifier::getMediaPlayerService()
         sDeathNotifier = new DeathNotifier();
     }
     binder->linkToDeath(sDeathNotifier);
+    //通过interface_cast，将这个binder转换成BpMediaPlayerService
     sMediaPlayerService = interface_cast<IMediaPlayerService>(binder);
     }
     LOGE_IF(sMediaPlayerService == 0, "no media player service!?");

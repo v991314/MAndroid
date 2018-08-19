@@ -395,10 +395,12 @@ void IPCThreadState::flushCommands()
     talkWithDriver(false);
 }
 
+//加入线程池
 void IPCThreadState::joinThreadPool(bool isMain)
 {
     LOG_THREADPOOL("**** THREAD %p (PID %d) IS JOINING THE THREAD POOL\n", (void*)pthread_self(), getpid());
-
+    //isMain传入的为true
+    //我们则需要循环处理，把请求信息写到mOut中，一起发出去
     mOut.writeInt32(isMain ? BC_ENTER_LOOPER : BC_REGISTER_LOOPER);
     
     // This thread may have been spawned by a thread that was in the background
@@ -420,7 +422,7 @@ void IPCThreadState::joinThreadPool(bool isMain)
                 }
                 mPendingWeakDerefs.clear();
             }
-
+            //处理已经死亡的BBinder对象
             numPending = mPendingStrongDerefs.size();
             if (numPending > 0) {
                 for (size_t i = 0; i < numPending; i++) {
@@ -430,7 +432,7 @@ void IPCThreadState::joinThreadPool(bool isMain)
                 mPendingStrongDerefs.clear();
             }
         }
-
+        //发送命令，读取请求
         // now get the next command to be processed, waiting if necessary
         result = talkWithDriver();
         if (result >= NO_ERROR) {
@@ -1006,7 +1008,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             if (tr.target.ptr) {
                 /*
                 BnServiceXXX从BBinder派生
-                这里的b实际上就是实现BnServiceXXX的那个对象
+                这里的b实际上就是实现BnServiceXXX的那个对象,这样就直接定位到了业务层的对象
                 */
                 sp<BBinder> b((BBinder*)tr.cookie);
                 const status_t error = b->transact(tr.code, buffer, &reply, 0);
@@ -1049,6 +1051,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             收到Binder驱动发来的service死掉的消息，看来只有Bp端能收到了
             */
             BpBinder *proxy = (BpBinder*)mIn.readInt32();
+            //发送讣告，obituary就是讣告的意思。最终会传递到DeathNotifier中
             proxy->sendObituary();
             mOut.writeInt32(BC_DEAD_BINDER_DONE);
             mOut.writeInt32((int32_t)proxy);

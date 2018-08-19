@@ -93,6 +93,7 @@ const String16& BBinder::getInterfaceDescriptor() const
     return sEmptyDescriptor;
 }
 
+
 status_t BBinder::transact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
@@ -104,6 +105,7 @@ status_t BBinder::transact(
             reply->writeInt32(pingBinder());
             break;
         default:
+            //调用子类的onTransact，这是一个虚函数。
             err = onTransact(code, data, reply, flags);
             break;
     }

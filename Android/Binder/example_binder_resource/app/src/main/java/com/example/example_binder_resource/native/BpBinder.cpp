@@ -329,6 +329,7 @@ BpBinder* BpBinder::remoteBinder()
 
 BpBinder::~BpBinder()
 {
+
     LOGV("Destroying BpBinder %p handle %d\n", this, mHandle);
 
     IPCThreadState* ipc = IPCThreadState::self();
