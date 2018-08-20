@@ -4,19 +4,19 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.me94me.practice_customize_view.ui.foundation.cavas.F1CanvasFragment
+import com.me94me.practice_customize_view.ui.foundation.paint.color.Paint1ColorFragment
 
-class F1CanvasPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
+class F2PaintPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
 
     override fun getItem(position: Int): Fragment {
         val bundle = Bundle()
         bundle.putInt("position",position)
-        val fragment = F1CanvasFragment()
+        val fragment = Paint1ColorFragment()
         fragment.arguments = bundle
         return fragment
     }
 
     override fun getCount(): Int {
-        return F1CanvasFragment.titles.size
+        return Paint1ColorFragment.titles.size
     }
 }
