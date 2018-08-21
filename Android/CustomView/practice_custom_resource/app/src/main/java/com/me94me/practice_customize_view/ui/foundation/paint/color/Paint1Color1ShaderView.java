@@ -20,6 +20,14 @@ import com.me94me.practice_customize_view.R;
 
 import androidx.annotation.Nullable;
 
+/**
+ * Shader:
+ * LinearGradient
+ * RadialGradient
+ * SweepGradient
+ * BitmapShader
+ * ComposeShader
+ */
 public class Paint1Color1ShaderView extends View {
     Paint paint = new Paint();
     public Paint1Color1ShaderView(Context context) {

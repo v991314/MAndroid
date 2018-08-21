@@ -20,9 +20,10 @@
         <activity android:name=".ui.foundation.cavas.F1CanvasActivity" />
         <activity android:name=".ui.foundation.paint.F2PaintActivity" />
         <activity android:name=".ui.foundation.paint.color.Paint1ColorActivity" />
-        <activity android:name=".ui.foundation.paint.Paint2EffectActivity" />
-        <activity android:name=".ui.foundation.paint.Paint3TextActivity" />
-        <activity android:name=".ui.foundation.paint.Paint4InitializeActivity"></activity>
+        <activity android:name=".ui.foundation.paint.effect.Paint2EffectActivity" />
+        <activity android:name=".ui.foundation.paint.text.Paint3TextActivity" />
+        <activity android:name=".ui.foundation.paint.initialize.Paint3InitializeActivity" />
+        <activity android:name=".ui.foundation.drawtext.DrawTextActivity"></activity>
     </application>
 
 </manifest>

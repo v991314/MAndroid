@@ -7,6 +7,8 @@ import com.me94me.practice_customize_view.adapter.F2PaintAdapter
 import com.me94me.practice_customize_view.base.BaseActivity
 import com.me94me.practice_customize_view.databinding.ActivityF2PaintBinding
 import com.me94me.practice_customize_view.ui.foundation.paint.color.Paint1ColorActivity
+import com.me94me.practice_customize_view.ui.foundation.paint.effect.Paint2EffectActivity
+import com.me94me.practice_customize_view.ui.foundation.paint.initialize.Paint3InitializeActivity
 
 /**
  * Canvas绘制的内容有三层对颜色的处理
@@ -35,6 +37,12 @@ class F2PaintActivity : BaseActivity() {
             0->{
                 startActivity(Intent(this, Paint1ColorActivity::class.java))
             }
+            1->{
+                startActivity(Intent(this,Paint2EffectActivity::class.java))
+            }
+            2->{
+                startActivity(Intent(this,Paint3InitializeActivity::class.java))
+            }
         }
     }
 
@@ -47,7 +55,7 @@ class F2PaintActivity : BaseActivity() {
     }
 
     override fun initData() {
-        adapter!!.setNewData(listOf("Paint1颜色","Paint2效果","Paint3DrawText","Paint4初始化"))
+        adapter!!.setNewData(listOf("Paint1颜色","Paint2效果","Paint3初始化"))
     }
 
 }

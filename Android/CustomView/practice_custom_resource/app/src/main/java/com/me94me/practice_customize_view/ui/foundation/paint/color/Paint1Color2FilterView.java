@@ -19,6 +19,12 @@ import com.me94me.practice_customize_view.R;
 
 import androidx.annotation.Nullable;
 
+/**
+ * ColorFilter:
+ * LightingColorFilter
+ * PorterDuffColorFilter
+ * ColorMatrixColorFilter
+ */
 public class Paint1Color2FilterView extends View {
     Paint paint = new Paint();
     public Paint1Color2FilterView(Context context) {

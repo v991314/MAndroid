@@ -8,6 +8,7 @@ import com.me94me.practice_customize_view.adapter.CFoundationAdapter
 import com.me94me.practice_customize_view.base.BaseActivity
 import com.me94me.practice_customize_view.databinding.ActivityC1FoundationBinding
 import com.me94me.practice_customize_view.ui.foundation.cavas.F1CanvasActivity
+import com.me94me.practice_customize_view.ui.foundation.drawtext.DrawTextActivity
 import com.me94me.practice_customize_view.ui.foundation.paint.F2PaintActivity
 
 class C1FoundationActivity : BaseActivity() {
@@ -26,7 +27,7 @@ class C1FoundationActivity : BaseActivity() {
                 startActivity(Intent(this,F2PaintActivity::class.java))
             }
             2->{
-
+                startActivity(Intent(this,DrawTextActivity::class.java))
             }
             3->{
 

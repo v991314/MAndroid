@@ -16,6 +16,7 @@ import com.me94me.practice_customize_view.R;
 import androidx.annotation.Nullable;
 
 /**
+ * Xfermode:
  * Xfermode 即 TransferMode
  * 将要绘制的内容和目标内容怎么结合计算出最终的颜色
  */
