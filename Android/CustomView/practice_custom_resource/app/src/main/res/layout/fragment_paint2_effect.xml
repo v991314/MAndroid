@@ -6,7 +6,7 @@
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.foundation.paint.effect.Paint2EffectFragment">
+        tools:context=".ui.foundation.f2paint.effect.Paint2EffectFragment">
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

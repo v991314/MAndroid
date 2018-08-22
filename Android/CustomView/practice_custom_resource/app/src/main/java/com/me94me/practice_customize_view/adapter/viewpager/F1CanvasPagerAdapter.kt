@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.me94me.practice_customize_view.ui.foundation.cavas.F1CanvasFragment
+import com.me94me.practice_customize_view.ui.foundation.f1cavas.F1CanvasFragment
 
 class F1CanvasPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
 

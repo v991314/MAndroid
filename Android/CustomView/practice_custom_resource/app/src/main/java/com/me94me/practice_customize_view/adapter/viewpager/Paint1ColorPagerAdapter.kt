@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.me94me.practice_customize_view.ui.foundation.paint.color.Paint1ColorFragment
+import com.me94me.practice_customize_view.ui.foundation.f2paint.color.Paint1ColorFragment
 
 class Paint1ColorPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
 

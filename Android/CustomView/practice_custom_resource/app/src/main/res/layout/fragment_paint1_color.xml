@@ -9,7 +9,7 @@
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.foundation.paint.color.Paint1ColorFragment">
+        tools:context=".ui.foundation.f2paint.color.Paint1ColorFragment">
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

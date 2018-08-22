@@ -9,13 +9,13 @@
             type="androidx.recyclerview.widget.LinearLayoutManager"/>
         <variable
             name="activity"
-            type="com.me94me.practice_customize_view.ui.foundation.paint.F2PaintActivity"/>
+            type="com.me94me.practice_customize_view.ui.foundation.f2paint.F2PaintActivity"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.foundation.paint.F2PaintActivity">
+        tools:context=".ui.foundation.f2paint.F2PaintActivity">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"

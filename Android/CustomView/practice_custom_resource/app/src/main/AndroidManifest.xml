@@ -17,13 +17,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.C1FoundationActivity" />
-        <activity android:name=".ui.foundation.cavas.F1CanvasActivity" />
-        <activity android:name=".ui.foundation.paint.F2PaintActivity" />
-        <activity android:name=".ui.foundation.paint.color.Paint1ColorActivity" />
-        <activity android:name=".ui.foundation.paint.effect.Paint2EffectActivity" />
-        <activity android:name=".ui.foundation.paint.text.Paint3TextActivity" />
-        <activity android:name=".ui.foundation.paint.initialize.Paint3InitializeActivity" />
-        <activity android:name=".ui.foundation.drawtext.DrawTextActivity"></activity>
+        <activity android:name=".ui.foundation.f1cavas.F1CanvasActivity" />
+        <activity android:name=".ui.foundation.f2paint.F2PaintActivity" />
+        <activity android:name=".ui.foundation.f2paint.color.Paint1ColorActivity" />
+        <activity android:name=".ui.foundation.f2paint.effect.Paint2EffectActivity" />
+        <activity android:name=".ui.foundation.f2paint.text.Paint3TextActivity" />
+        <activity android:name=".ui.foundation.f2paint.initialize.Paint3InitializeActivity" />
+        <activity android:name=".ui.foundation.f3drawtext.F3DrawTextActivity" />
+        <activity android:name=".ui.foundation.f4clipmatrix.F4ClipMatrixActivity"></activity>
     </application>
 
 </manifest>

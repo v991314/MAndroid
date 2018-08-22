@@ -10,7 +10,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.foundation.paint.color.Paint1ColorActivity">
+        tools:context=".ui.foundation.f2paint.color.Paint1ColorActivity">
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewPager"

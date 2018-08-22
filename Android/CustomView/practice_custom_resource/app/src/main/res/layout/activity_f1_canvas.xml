@@ -6,13 +6,13 @@
     <data>
         <variable
             name="activity"
-            type="com.me94me.practice_customize_view.ui.foundation.cavas.F1CanvasActivity"/>
+            type="com.me94me.practice_customize_view.ui.foundation.f1cavas.F1CanvasActivity"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.foundation.cavas.F1CanvasActivity">
+        tools:context=".ui.foundation.f1cavas.F1CanvasActivity">
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/viewPager"

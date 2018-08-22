@@ -4,19 +4,19 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.me94me.practice_customize_view.ui.foundation.f2paint.effect.Paint2EffectFragment
+import com.me94me.practice_customize_view.ui.foundation.f4clipmatrix.F4ClipMatrixFragment
 
-class Paint2EffectPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
+class F4ClipMatrixPagerAdapter(fragmentManager:FragmentManager) :FragmentStatePagerAdapter(fragmentManager) {
 
     override fun getItem(position: Int): Fragment {
         val bundle = Bundle()
         bundle.putInt("position",position)
-        val fragment = Paint2EffectFragment()
+        val fragment = F4ClipMatrixFragment()
         fragment.arguments = bundle
         return fragment
     }
 
     override fun getCount(): Int {
-        return Paint2EffectFragment.titles.size
+        return F4ClipMatrixFragment.titles.size
     }
 }
