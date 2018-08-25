@@ -1,6 +1,8 @@
 package com.me94me.mrecyclerview
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,14 +16,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = object :BaseQuickAdapter<Int,BaseViewHolder>(R.layout.adapter){
-            override fun convert(helper: BaseViewHolder?, item: Int?) {
-                helper!!.getView<TextView>(R.id.text).text = "测试".plus(helper.adapterPosition)
+
+        val adapter = object :BaseQuickAdapter<String,BaseViewHolder>(R.layout.adapter){
+            override fun convert(helper: BaseViewHolder?, item: String?) {
+                val position = helper!!.adapterPosition
+
+                helper.getView<TextView>(R.id.text).text = item
+
+                helper.itemView.setOnClickListener {
+                    when(position){
+                        0->{
+                            startActivity(Intent(this@MainActivity,M1FastScrollerActivity::class.java))
+                        }
+                    }
+                }
             }
         }
         recyclerView.adapter = adapter
-        adapter.setNewData(listOf(1,1,1,1,1,1,1))
+        adapter.setNewData(listOf("fastScroller"))
 
     }
 }
