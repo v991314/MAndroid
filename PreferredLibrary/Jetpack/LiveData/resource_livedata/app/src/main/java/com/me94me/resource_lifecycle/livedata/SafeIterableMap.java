@@ -337,13 +337,13 @@ public class SafeIterableMap<K, V> implements Iterable<Map.Entry<K, V>> {
         void supportRemove(@NonNull Entry<K, V> entry);
     }
 
-    static class Entry<K, V> implements Map.Entry<K, V> {
+    public static class Entry<K, V> implements Map.Entry<K, V> {
         @NonNull
         final K mKey;
         @NonNull
-        final V mValue;
+        public final V mValue;
         Entry<K, V> mNext;
-        Entry<K, V> mPrevious;
+        public Entry<K, V> mPrevious;
 
         Entry(@NonNull K key, @NonNull V value) {
             mKey = key;

@@ -13,5 +13,6 @@ class MainActivity : AppCompatActivity() {
 
 //        viewModel!!.liveData.observe(this)
 //        viewModel!!.liveData.finishActivity()
+        lifecycle
     }
 }

@@ -5,7 +5,6 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.internal.SafeIterableMap;
 import androidx.lifecycle.Observer;
 
 import java.util.Map;
@@ -51,7 +50,6 @@ import java.util.Map;
  *
  * @param <T> The type of data hold by this instance
  */
-@SuppressWarnings("WeakerAccess")
 public class MediatorLiveData<T> extends MutableLiveData<T> {
     private SafeIterableMap<LiveData<?>, Source<?>> mSources = new SafeIterableMap<>();
 
